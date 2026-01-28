@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eingabe und Ausgabe - Informatik Lernapp</title>
+    <link rel="stylesheet" href="../../styles/main.css">
+    <style>
+        .device-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .device-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .device-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .device-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .io-simulator {
+            background: #2d3748;
+            color: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        .io-display {
+            background: #1a202c;
+            padding: 1rem;
+            border-radius: 8px;
+            min-height: 100px;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="lesson-header">
+            <button class="btn btn-secondary" onclick="window.location.href='../../student-dashboard.html'">
+                ← Zurück zum Dashboard
+            </button>
+            <h1>⌨️ Eingabe und Ausgabe</h1>
+            <div class="lesson-info">
+                <span class="badge">Klasse 5</span>
+                <span class="badge badge-primary">Lektion 2/6</span>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('theory')">📖 Theorie</button>
+            <button class="tab-btn" onclick="switchTab('interactive')">🎮 Interaktiv</button>
+            <button class="tab-btn" onclick="switchTab('quiz')">✅ Quiz</button>
+        </div>
+
+        <!-- Theory Tab -->
+        <div id="theory" class="tab-content active">
+            <div class="card">
+                <h2>Was sind Eingabe- und Ausgabegeräte?</h2>
+                <p>Computer kommunizieren mit uns Menschen über spezielle Geräte:</p>
+                
+                <div style="margin: 2rem 0;">
+                    <div style="background: #e6f7ff; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea; margin-bottom: 1rem;">
+                        <h3 style="color: #667eea;">⌨️ Eingabegeräte</h3>
+                        <p><strong>Definition:</strong> Geräte, mit denen wir dem Computer Informationen geben.</p>
+                        <p><strong>Beispiele:</strong> Tastatur, Maus, Mikrofon, Kamera, Scanner, Touchscreen</p>
+                        <p><strong>Merksatz:</strong> "Von Mensch ZU Computer"</p>
+                    </div>
+
+                    <div style="background: #fff4e6; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ed8936; margin-bottom: 1rem;">
+                        <h3 style="color: #ed8936;">🖥️ Ausgabegeräte</h3>
+                        <p><strong>Definition:</strong> Geräte, mit denen der Computer uns Informationen gibt.</p>
+                        <p><strong>Beispiele:</strong> Monitor/Bildschirm, Lautsprecher, Drucker, Beamer</p>
+                        <p><strong>Merksatz:</strong> "Von Computer ZU Mensch"</p>
+                    </div>
+
+                    <div style="background: #f0fff4; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #48bb78;">
+                        <h3 style="color: #48bb78;">🔄 Eingabe UND Ausgabe</h3>
+                        <p>Manche Geräte können beides!</p>
+                        <p><strong>Beispiele:</strong> Touchscreen (zeigt und nimmt Eingaben entgegen), Drucker mit Scanner, Headsets</p>
+                    </div>
+                </div>
+
+                <h3>🎯 Warum ist das wichtig?</h3>
+                <ul>
+                    <li>Ohne Eingabegeräte könnten wir dem Computer keine Befehle geben</li>
+                    <li>Ohne Ausgabegeräte könnten wir nicht sehen, was der Computer macht</li>
+                    <li>Erst durch diese Geräte können Menschen mit Computern arbeiten</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Interactive Tab -->
+        <div id="interactive" class="tab-content">
+            <div class="card">
+                <h2>🎮 Geräte sortieren</h2>
+                <p>Klicke auf die Geräte und ordne sie richtig zu:</p>
+
+                <div class="grid grid-3" style="margin: 2rem 0;">
+                    <div class="device-card" onclick="selectDevice(this, 'input')" data-type="input">
+                        <div class="device-icon">⌨️</div>
+                        <strong>Tastatur</strong>
+                    </div>
+                    <div class="device-card" onclick="selectDevice(this, 'output')" data-type="output">
+                        <div class="device-icon">🖥️</div>
+                        <strong>Monitor</strong>
+                    </div>
+                    <div class="device-card" onclick="selectDevice(this, 'input')" data-type="input">
+                        <div class="device-icon">🖱️</div>
+                        <strong>Maus</strong>
+                    </div>
+                    <div class="device-card" onclick="selectDevice(this, 'output')" data-type="output">
+                        <div class="device-icon">🔊</div>
+                        <strong>Lautsprecher</strong>
+                    </div>
+                    <div class="device-card" onclick="selectDevice(this, 'both')" data-type="both">
+                        <div class="device-icon">📱</div>
+                        <strong>Touchscreen</strong>
+                    </div>
+                    <div class="device-card" onclick="selectDevice(this, 'input')" data-type="input">
+                        <div class="device-icon">🎤</div>
+                        <strong>Mikrofon</strong>
+                    </div>
+                    <div class="device-card" onclick="selectDevice(this, 'output')" data-type="output">
+                        <div class="device-icon">🖨️</div>
+                        <strong>Drucker</strong>
+                    </div>
+                    <div class="device-card" onclick="selectDevice(this, 'input')" data-type="input">
+                        <div class="device-icon">📷</div>
+                        <strong>Kamera</strong>
+                    </div>
+                    <div class="device-card" onclick="selectDevice(this, 'both')" data-type="both">
+                        <div class="device-icon">🎧</div>
+                        <strong>Headset</strong>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin: 2rem 0;">
+                    <button class="btn btn-primary" onclick="filterDevices('input')">⌨️ Eingabe anzeigen</button>
+                    <button class="btn btn-secondary" onclick="filterDevices('output')">🖥️ Ausgabe anzeigen</button>
+                    <button class="btn" onclick="filterDevices('both')">🔄 Beides anzeigen</button>
+                    <button class="btn" onclick="filterDevices('all')">Alle anzeigen</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💻 Eingabe-Ausgabe Simulator</h2>
+                <p>Tippe etwas in das Eingabefeld und sieh, wie der Computer es verarbeitet:</p>
+
+                <div class="io-simulator">
+                    <h3 style="color: #667eea;">⌨️ EINGABE (Tastatur)</h3>
+                    <input 
+                        type="text" 
+                        id="userInput" 
+                        placeholder="Tippe hier etwas ein..."
+                        style="width: 100%; padding: 1rem; font-size: 1.2rem; border-radius: 8px; border: none;"
+                        oninput="processInput()"
+                    >
+
+                    <div style="margin: 2rem 0; text-align: center; font-size: 2rem;">
+                        ⬇️ Computer verarbeitet ⬇️
+                    </div>
+
+                    <h3 style="color: #ed8936;">🖥️ AUSGABE (Monitor)</h3>
+                    <div id="computerOutput" class="io-display">
+                        Hier erscheint die Ausgabe...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Tab -->
+        <div id="quiz" class="tab-content">
+            <div class="card">
+                <h2>✅ Wissenstest</h2>
+                <div id="quizContainer"></div>
+                <button id="checkBtn" class="btn btn-primary" onclick="checkQuiz()" style="display: none;">
+                    Antworten überprüfen
+                </button>
+                <div id="quizResult"></div>
+            </div>
+        </div>
+
+        <!-- Complete Button -->
+        <div style="text-align: center; margin: 2rem 0;">
+            <button class="btn btn-success btn-lg" onclick="completeLesson()">
+                ✓ Lektion abschließen
+            </button>
+        </div>
+    </div>
+
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+    <script>
+        requireAuth();
+        const lessonId = 'k5-02';
+        
+        const quizQuestions = [
+            {
+                question: "Was ist ein Eingabegerät?",
+                options: [
+                    "Ein Gerät, das Informationen vom Computer zum Menschen bringt",
+                    "Ein Gerät, mit dem wir dem Computer Informationen geben",
+                    "Ein Gerät, das nur Musik abspielen kann",
+                    "Ein Gerät zum Ausdrucken von Dokumenten"
+                ],
+                correct: 1
+            },
+            {
+                question: "Welches ist ein Ausgabegerät?",
+                options: [
+                    "Tastatur",
+                    "Maus",
+                    "Monitor",
+                    "Mikrofon"
+                ],
+                correct: 2
+            },
+            {
+                question: "Was kann ein Touchscreen?",
+                options: [
+                    "Nur Eingabe",
+                    "Nur Ausgabe",
+                    "Beides: Eingabe und Ausgabe",
+                    "Weder Eingabe noch Ausgabe"
+                ],
+                correct: 2
+            },
+            {
+                question: "Welches Gerät ist NUR für die Eingabe gedacht?",
+                options: [
+                    "Headset",
+                    "Touchscreen",
+                    "Tastatur",
+                    "Beamer"
+                ],
+                correct: 2
+            }
+        ];
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'quiz') {
+                loadQuiz();
+            }
+        }
+
+        function selectDevice(card, type) {
+            card.classList.toggle('selected');
+        }
+
+        function filterDevices(filterType) {
+            const cards = document.querySelectorAll('.device-card');
+            cards.forEach(card => {
+                const deviceType = card.getAttribute('data-type');
+                if (filterType === 'all' || deviceType === filterType) {
+                    card.style.display = 'flex';
+                    card.style.opacity = '1';
+                } else {
+                    card.style.opacity = '0.3';
+                }
+            });
+        }
+
+        function processInput() {
+            const input = document.getElementById('userInput').value;
+            const output = document.getElementById('computerOutput');
+            
+            if (input.trim() === '') {
+                output.innerHTML = 'Hier erscheint die Ausgabe...';
+            } else {
+                output.innerHTML = `
+                    <div style="margin-bottom: 1rem;">Du hast eingegeben: <strong>"${input}"</strong></div>
+                    <div>Anzahl Zeichen: <strong>${input.length}</strong></div>
+                    <div>In Großbuchstaben: <strong>${input.toUpperCase()}</strong></div>
+                    <div>Rückwärts: <strong>${input.split('').reverse().join('')}</strong></div>
+                `;
+            }
+        }
+
+        function loadQuiz() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = quizQuestions.map((q, index) => `
+                <div class="quiz-question" style="margin-bottom: 2rem; padding: 1.5rem; background: #f7fafc; border-radius: 8px;">
+                    <h3 style="color: #2d3748; margin-bottom: 1rem;">Frage ${index + 1}: ${q.question}</h3>
+                    ${q.options.map((option, i) => `
+                        <label style="display: block; padding: 0.75rem; margin: 0.5rem 0; background: white; border-radius: 6px; cursor: pointer; border: 2px solid #e2e8f0;">
+                            <input type="radio" name="question${index}" value="${i}" style="margin-right: 0.5rem;">
+                            ${option}
+                        </label>
+                    `).join('')}
+                </div>
+            `).join('');
+            
+            document.getElementById('checkBtn').style.display = 'block';
+        }
+
+        function checkQuiz() {
+            let correctCount = 0;
+            const resultDiv = document.getElementById('quizResult');
+            
+            quizQuestions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="question${index}"]:checked`);
+                if (selected && parseInt(selected.value) === q.correct) {
+                    correctCount++;
+                }
+            });
+            
+            const percentage = Math.round((correctCount / quizQuestions.length) * 100);
+            const passed = percentage >= 60;
+            
+            resultDiv.innerHTML = `
+                <div style="margin-top: 2rem; padding: 2rem; background: ${passed ? '#f0fff4' : '#fff5f5'}; border-radius: 12px; border: 2px solid ${passed ? '#48bb78' : '#f56565'};">
+                    <h3 style="color: ${passed ? '#48bb78' : '#f56565'}; font-size: 1.5rem; margin-bottom: 1rem;">
+                        ${passed ? '🎉 Bestanden!' : '❌ Noch nicht bestanden'}
+                    </h3>
+                    <p style="font-size: 1.2rem;">
+                        Du hast <strong>${correctCount} von ${quizQuestions.length}</strong> Fragen richtig beantwortet.
+                    </p>
+                    <p style="font-size: 1.5rem; font-weight: bold; color: ${passed ? '#48bb78' : '#f56565'};">
+                        Ergebnis: ${percentage}%
+                    </p>
+                    ${!passed ? '<p style="margin-top: 1rem;">💡 Tipp: Lies dir die Theorie noch einmal durch und versuche es erneut!</p>' : ''}
+                </div>
+            `;
+            
+            if (passed) {
+                setTimeout(() => {
+                    markLessonCompleted(getCurrentToken(), lessonId, percentage);
+                }, 1000);
+            }
+        }
+
+        function completeLesson() {
+            const confirmed = confirm('Möchtest du diese Lektion als abgeschlossen markieren?');
+            if (confirmed) {
+                markLessonCompleted(getCurrentToken(), lessonId, 100);
+                alert('🎉 Lektion abgeschlossen! Du wirst zum Dashboard weitergeleitet.');
+                window.location.href = '../../student-dashboard.html';
+            }
+        }
+
+        // Mark lesson as in-progress
+        markLessonInProgress(getCurrentToken(), lessonId);
+    </script>
+</body>
+</html>

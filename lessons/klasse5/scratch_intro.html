@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erste Schritte mit Scratch - Informatik Lernapp</title>
+    <link rel="stylesheet" href="../../styles/main.css">
+    <style>
+        .scratch-block {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin: 0.5rem 0;
+            cursor: move;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .scratch-block:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        .scratch-block.motion { background: linear-gradient(135deg, #4c9aff 0%, #0052cc 100%); }
+        .scratch-block.looks { background: linear-gradient(135deg, #9b51e0 0%, #7e22ce 100%); }
+        .scratch-block.sound { background: linear-gradient(135deg, #d946ef 0%, #a21caf 100%); }
+        .scratch-block.events { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1a202c; }
+        
+        .scratch-workspace {
+            background: #f7fafc;
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            min-height: 300px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        .scratch-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .sprite-stage {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .sprite {
+            font-size: 4rem;
+            animation: idle 2s ease-in-out infinite;
+        }
+        @keyframes idle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .code-explanation {
+            background: #fff;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="lesson-header">
+            <button class="btn btn-secondary" onclick="window.location.href='../../student-dashboard.html'">
+                ← Zurück zum Dashboard
+            </button>
+            <h1>🐱 Erste Schritte mit Scratch</h1>
+            <div class="lesson-info">
+                <span class="badge">Klasse 5</span>
+                <span class="badge badge-primary">Lektion 4/6</span>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('theory')">📖 Theorie</button>
+            <button class="tab-btn" onclick="switchTab('interactive')">🎮 Interaktiv</button>
+            <button class="tab-btn" onclick="switchTab('quiz')">✅ Quiz</button>
+        </div>
+
+        <!-- Theory Tab -->
+        <div id="theory" class="tab-content active">
+            <div class="card">
+                <h2>Was ist Scratch?</h2>
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; margin: 2rem 0;">
+                    <h3 style="color: white;">🎨 Scratch = Visuelles Programmieren</h3>
+                    <p style="font-size: 1.1rem;">Scratch ist eine Programmiersprache, bei der du <strong>bunte Blöcke</strong> wie Lego-Steine zusammensetzt, anstatt Text zu tippen!</p>
+                </div>
+
+                <h3>🧩 Die Hauptbestandteile von Scratch</h3>
+                
+                <div class="grid grid-2" style="margin: 2rem 0;">
+                    <div style="background: #e6f7ff; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: #0052cc;">🎭 Sprites (Figuren)</h4>
+                        <p>Das sind die Charaktere in deinem Programm. Die Standard-Figur ist die <strong>Katze</strong>.</p>
+                        <div style="font-size: 3rem; text-align: center; margin: 1rem 0;">🐱</div>
+                    </div>
+
+                    <div style="background: #fff4e6; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: #f59e0b;">🎬 Bühne (Stage)</h4>
+                        <p>Der weiße Bereich, wo deine Sprites sich bewegen und agieren.</p>
+                        <div style="font-size: 3rem; text-align: center; margin: 1rem 0;">📺</div>
+                    </div>
+                </div>
+
+                <h3>🎨 Block-Kategorien</h3>
+                <div style="margin: 2rem 0;">
+                    <div class="code-explanation" style="border-color: #4c9aff;">
+                        <h4 style="color: #0052cc;">🔵 Bewegung (Motion)</h4>
+                        <p>Blocks zum Bewegen der Sprites: gehe 10 Schritte, drehe dich, gleite zu Position...</p>
+                    </div>
+
+                    <div class="code-explanation" style="border-color: #9b51e0;">
+                        <h4 style="color: #7e22ce;">🟣 Aussehen (Looks)</h4>
+                        <p>Blocks zum Ändern des Aussehens: sage "Hallo!", verstecke dich, ändere Kostüm...</p>
+                    </div>
+
+                    <div class="code-explanation" style="border-color: #d946ef;">
+                        <h4 style="color: #a21caf;">🟣 Klang (Sound)</h4>
+                        <p>Blocks zum Abspielen von Tönen und Musik</p>
+                    </div>
+
+                    <div class="code-explanation" style="border-color: #fbbf24;">
+                        <h4 style="color: #f59e0b;">🟡 Ereignisse (Events)</h4>
+                        <p>Blocks, die ein Programm starten: wenn grüne Flagge angeklickt, wenn Taste gedrückt...</p>
+                    </div>
+                </div>
+
+                <h3>🎯 Warum Scratch lernen?</h3>
+                <ul>
+                    <li>✅ <strong>Einfach zu verstehen:</strong> Keine komplizierten Befehle tippen</li>
+                    <li>✅ <strong>Visuell:</strong> Du siehst sofort, was dein Programm macht</li>
+                    <li>✅ <strong>Kreativ:</strong> Erstelle Spiele, Animationen und Geschichten</li>
+                    <li>✅ <strong>Lernt Programmier-Konzepte:</strong> Sequenzen, Schleifen, Bedingungen</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Interactive Tab -->
+        <div id="interactive" class="tab-content">
+            <div class="card">
+                <h2>🎮 Scratch-Block-Simulator</h2>
+                <p>Ziehe Blöcke in die Arbeitsfläche und klicke auf "Programm ausführen":</p>
+
+                <h3>📦 Block-Palette</h3>
+                <div class="scratch-palette">
+                    <div class="scratch-block events" draggable="true" ondragstart="drag(event)" data-action="start">
+                        🚩 Wenn Flagge angeklickt
+                    </div>
+                    <div class="scratch-block looks" draggable="true" ondragstart="drag(event)" data-action="say">
+                        💬 Sage "Hallo!"
+                    </div>
+                    <div class="scratch-block motion" draggable="true" ondragstart="drag(event)" data-action="move">
+                        ➡️ Gehe 50 Schritte
+                    </div>
+                    <div class="scratch-block motion" draggable="true" ondragstart="drag(event)" data-action="turn">
+                        🔄 Drehe dich 90°
+                    </div>
+                    <div class="scratch-block looks" draggable="true" ondragstart="drag(event)" data-action="hide">
+                        👻 Verstecke dich
+                    </div>
+                    <div class="scratch-block looks" draggable="true" ondragstart="drag(event)" data-action="show">
+                        👁️ Zeige dich
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <div>
+                        <h3>💻 Arbeitsfläche (ziehe Blöcke hierher)</h3>
+                        <div id="workspace" class="scratch-workspace" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <p style="color: #a0aec0;">Ziehe Blöcke hierher...</p>
+                        </div>
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                            <button class="btn btn-success" onclick="runProgram()">▶️ Programm ausführen</button>
+                            <button class="btn btn-danger" onclick="clearWorkspace()">🗑️ Löschen</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>🎬 Bühne</h3>
+                        <div class="sprite-stage">
+                            <div id="sprite" class="sprite">🐱</div>
+                            <div id="speechBubble" style="display: none; background: white; border: 2px solid #2d3748; border-radius: 12px; padding: 1rem; margin-top: 1rem; font-weight: bold;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📝 Programm-Beispiele</h2>
+                <div class="grid grid-2">
+                    <button class="btn btn-primary" onclick="loadExample('hello')">
+                        Beispiel 1: Hallo sagen
+                    </button>
+                    <button class="btn btn-primary" onclick="loadExample('dance')">
+                        Beispiel 2: Tanz-Animation
+                    </button>
+                    <button class="btn btn-primary" onclick="loadExample('hide')">
+                        Beispiel 3: Versteckspiel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Tab -->
+        <div id="quiz" class="tab-content">
+            <div class="card">
+                <h2>✅ Wissenstest</h2>
+                <div id="quizContainer"></div>
+                <button id="checkBtn" class="btn btn-primary" onclick="checkQuiz()" style="display: none;">
+                    Antworten überprüfen
+                </button>
+                <div id="quizResult"></div>
+            </div>
+        </div>
+
+        <!-- Complete Button -->
+        <div style="text-align: center; margin: 2rem 0;">
+            <button class="btn btn-success btn-lg" onclick="completeLesson()">
+                ✓ Lektion abschließen
+            </button>
+        </div>
+    </div>
+
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+    <script>
+        requireAuth();
+        const lessonId = 'k5-04';
+        
+        let workspaceBlocks = [];
+        let spriteRotation = 0;
+        let spriteX = 0;
+
+        const quizQuestions = [
+            {
+                question: "Was ist Scratch?",
+                options: [
+                    "Eine Katze",
+                    "Eine visuelle Programmiersprache mit Blöcken",
+                    "Ein Computerspiel",
+                    "Eine Textverarbeitung"
+                ],
+                correct: 1
+            },
+            {
+                question: "Was ist ein Sprite in Scratch?",
+                options: [
+                    "Ein Getränk",
+                    "Eine Figur/Charakter im Programm",
+                    "Ein Programmier-Fehler",
+                    "Eine Taste auf der Tastatur"
+                ],
+                correct: 1
+            },
+            {
+                question: "Welcher Block startet ein Scratch-Programm?",
+                options: [
+                    "Sage Hallo",
+                    "Gehe 10 Schritte",
+                    "Wenn grüne Flagge angeklickt",
+                    "Verstecke dich"
+                ],
+                correct: 2
+            },
+            {
+                question: "Wozu dient die Bühne (Stage) in Scratch?",
+                options: [
+                    "Zum Speichern von Dateien",
+                    "Als Bereich, wo Sprites sich bewegen und agieren",
+                    "Zum Drucken von Dokumenten",
+                    "Zum Surfen im Internet"
+                ],
+                correct: 1
+            }
+        ];
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'quiz') loadQuiz();
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("action", ev.target.getAttribute('data-action'));
+            ev.dataTransfer.setData("text", ev.target.textContent);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const action = ev.dataTransfer.getData("action");
+            const text = ev.dataTransfer.getData("text");
+            
+            const block = document.createElement('div');
+            block.className = 'scratch-block';
+            block.textContent = text;
+            block.setAttribute('data-action', action);
+            
+            // Style based on action type
+            if (action === 'start') block.classList.add('events');
+            else if (action === 'say' || action === 'hide' || action === 'show') block.classList.add('looks');
+            else if (action === 'move' || action === 'turn') block.classList.add('motion');
+            
+            const workspace = document.getElementById('workspace');
+            if (workspace.children[0].tagName === 'P') {
+                workspace.innerHTML = '';
+            }
+            workspace.appendChild(block);
+            
+            workspaceBlocks.push(action);
+        }
+
+        function clearWorkspace() {
+            document.getElementById('workspace').innerHTML = '<p style="color: #a0aec0;">Ziehe Blöcke hierher...</p>';
+            workspaceBlocks = [];
+            resetSprite();
+        }
+
+        function resetSprite() {
+            const sprite = document.getElementById('sprite');
+            sprite.style.transform = 'translateX(0) rotate(0deg)';
+            sprite.style.display = 'block';
+            spriteRotation = 0;
+            spriteX = 0;
+            document.getElementById('speechBubble').style.display = 'none';
+        }
+
+        async function runProgram() {
+            const blocks = document.querySelectorAll('#workspace .scratch-block');
+            resetSprite();
+            
+            if (blocks.length === 0) {
+                alert('⚠️ Füge erst Blöcke hinzu!');
+                return;
+            }
+
+            for (let block of blocks) {
+                await executeBlock(block.getAttribute('data-action'));
+                await sleep(800);
+            }
+        }
+
+        async function executeBlock(action) {
+            const sprite = document.getElementById('sprite');
+            const bubble = document.getElementById('speechBubble');
+            
+            switch(action) {
+                case 'start':
+                    console.log('🚩 Programm gestartet!');
+                    break;
+                case 'say':
+                    bubble.textContent = 'Hallo! 👋';
+                    bubble.style.display = 'block';
+                    await sleep(2000);
+                    bubble.style.display = 'none';
+                    break;
+                case 'move':
+                    spriteX += 50;
+                    sprite.style.transform = `translateX(${spriteX}px) rotate(${spriteRotation}deg)`;
+                    break;
+                case 'turn':
+                    spriteRotation += 90;
+                    sprite.style.transform = `translateX(${spriteX}px) rotate(${spriteRotation}deg)`;
+                    break;
+                case 'hide':
+                    sprite.style.display = 'none';
+                    break;
+                case 'show':
+                    sprite.style.display = 'block';
+                    break;
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function loadExample(type) {
+            clearWorkspace();
+            const workspace = document.getElementById('workspace');
+            workspace.innerHTML = '';
+            
+            const examples = {
+                hello: [
+                    { text: '🚩 Wenn Flagge angeklickt', action: 'start', class: 'events' },
+                    { text: '💬 Sage "Hallo!"', action: 'say', class: 'looks' }
+                ],
+                dance: [
+                    { text: '🚩 Wenn Flagge angeklickt', action: 'start', class: 'events' },
+                    { text: '🔄 Drehe dich 90°', action: 'turn', class: 'motion' },
+                    { text: '🔄 Drehe dich 90°', action: 'turn', class: 'motion' },
+                    { text: '🔄 Drehe dich 90°', action: 'turn', class: 'motion' }
+                ],
+                hide: [
+                    { text: '🚩 Wenn Flagge angeklickt', action: 'start', class: 'events' },
+                    { text: '💬 Sage "Hallo!"', action: 'say', class: 'looks' },
+                    { text: '👻 Verstecke dich', action: 'hide', class: 'looks' },
+                    { text: '👁️ Zeige dich', action: 'show', class: 'looks' }
+                ]
+            };
+            
+            examples[type].forEach(blockData => {
+                const block = document.createElement('div');
+                block.className = `scratch-block ${blockData.class}`;
+                block.textContent = blockData.text;
+                block.setAttribute('data-action', blockData.action);
+                workspace.appendChild(block);
+            });
+        }
+
+        function loadQuiz() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = quizQuestions.map((q, index) => `
+                <div class="quiz-question" style="margin-bottom: 2rem; padding: 1.5rem; background: #f7fafc; border-radius: 8px;">
+                    <h3 style="color: #2d3748; margin-bottom: 1rem;">Frage ${index + 1}: ${q.question}</h3>
+                    ${q.options.map((option, i) => `
+                        <label style="display: block; padding: 0.75rem; margin: 0.5rem 0; background: white; border-radius: 6px; cursor: pointer; border: 2px solid #e2e8f0;">
+                            <input type="radio" name="question${index}" value="${i}" style="margin-right: 0.5rem;">
+                            ${option}
+                        </label>
+                    `).join('')}
+                </div>
+            `).join('');
+            
+            document.getElementById('checkBtn').style.display = 'block';
+        }
+
+        function checkQuiz() {
+            let correctCount = 0;
+            quizQuestions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="question${index}"]:checked`);
+                if (selected && parseInt(selected.value) === q.correct) correctCount++;
+            });
+            
+            const percentage = Math.round((correctCount / quizQuestions.length) * 100);
+            const passed = percentage >= 60;
+            
+            document.getElementById('quizResult').innerHTML = `
+                <div style="margin-top: 2rem; padding: 2rem; background: ${passed ? '#f0fff4' : '#fff5f5'}; border-radius: 12px; border: 2px solid ${passed ? '#48bb78' : '#f56565'};">
+                    <h3 style="color: ${passed ? '#48bb78' : '#f56565'}; font-size: 1.5rem; margin-bottom: 1rem;">
+                        ${passed ? '🎉 Bestanden!' : '❌ Noch nicht bestanden'}
+                    </h3>
+                    <p style="font-size: 1.2rem;">Du hast <strong>${correctCount} von ${quizQuestions.length}</strong> Fragen richtig beantwortet.</p>
+                    <p style="font-size: 1.5rem; font-weight: bold; color: ${passed ? '#48bb78' : '#f56565'};">Ergebnis: ${percentage}%</p>
+                </div>
+            `;
+            
+            if (passed) setTimeout(() => markLessonCompleted(getCurrentToken(), lessonId, percentage), 1000);
+        }
+
+        function completeLesson() {
+            if (confirm('Möchtest du diese Lektion als abgeschlossen markieren?')) {
+                markLessonCompleted(getCurrentToken(), lessonId, 100);
+                alert('🎉 Lektion abgeschlossen!');
+                window.location.href = '../../student-dashboard.html';
+            }
+        }
+
+        markLessonInProgress(getCurrentToken(), lessonId);
+    </script>
+</body>
+</html>

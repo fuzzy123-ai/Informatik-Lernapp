@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schleifen verstehen - Informatik Lernapp</title>
+    <link rel="stylesheet" href="../../styles/main.css">
+    <style>
+        .loop-demo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+        .loop-iteration {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #48bb78;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .code-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .code-box {
+            background: #2d3748;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-family: monospace;
+        }
+        .code-box.bad {
+            border: 3px solid #f56565;
+        }
+        .code-box.good {
+            border: 3px solid #48bb78;
+        }
+        .pattern-visualizer {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            min-height: 200px;
+        }
+        .loop-control {
+            background: #f7fafc;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+        .slider-container {
+            margin: 1.5rem 0;
+        }
+        .output-box {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: monospace;
+            min-height: 150px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="lesson-header">
+            <button class="btn btn-secondary" onclick="window.location.href='../../student-dashboard.html'">
+                ← Zurück zum Dashboard
+            </button>
+            <h1>🔄 Schleifen verstehen</h1>
+            <div class="lesson-info">
+                <span class="badge">Klasse 5</span>
+                <span class="badge badge-primary">Lektion 6/6</span>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('theory')">📖 Theorie</button>
+            <button class="tab-btn" onclick="switchTab('interactive')">🎮 Interaktiv</button>
+            <button class="tab-btn" onclick="switchTab('quiz')">✅ Quiz</button>
+        </div>
+
+        <!-- Theory Tab -->
+        <div id="theory" class="tab-content active">
+            <div class="card">
+                <h2>Was sind Schleifen?</h2>
+                <div class="loop-demo">
+                    <h3 style="color: white;">🔄 Definition</h3>
+                    <p style="font-size: 1.2rem; line-height: 1.6;">
+                        Eine <strong>Schleife</strong> ist ein Programmteil, der <strong>mehrmals wiederholt</strong> wird.<br>
+                        Statt denselben Code immer wieder zu schreiben, nutzen wir eine Schleife!
+                    </p>
+                </div>
+
+                <h3>❌ Ohne Schleife (ineffizient)</h3>
+                <div class="code-comparison">
+                    <div class="code-box bad">
+                        <div style="color: #f56565; margin-bottom: 1rem;">// ❌ Viel zu viel Code!</div>
+                        <div>sage("Hallo!")</div>
+                        <div>sage("Hallo!")</div>
+                        <div>sage("Hallo!")</div>
+                        <div>sage("Hallo!")</div>
+                        <div>sage("Hallo!")</div>
+                        <div>sage("Hallo!")</div>
+                        <div>sage("Hallo!")</div>
+                        <div>sage("Hallo!")</div>
+                        <div>sage("Hallo!")</div>
+                        <div>sage("Hallo!")</div>
+                        <div style="color: #a0aec0; margin-top: 1rem;">// 10 Zeilen!</div>
+                    </div>
+
+                    <div class="code-box good">
+                        <div style="color: #48bb78; margin-bottom: 1rem;">// ✅ Viel besser mit Schleife!</div>
+                        <div>wiederhole 10 mal:</div>
+                        <div style="margin-left: 2rem;">sage("Hallo!")</div>
+                        <div style="color: #a0aec0; margin-top: 1rem;">// Nur 2 Zeilen!</div>
+                    </div>
+                </div>
+
+                <h3>🎯 Alltagsbeispiele für Schleifen</h3>
+                <div class="grid grid-2" style="margin: 2rem 0;">
+                    <div style="background: #e6f7ff; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: #0052cc;">🏃 Runden laufen</h4>
+                        <p><strong>Ohne Schleife:</strong></p>
+                        <ul style="font-size: 0.9rem;">
+                            <li>Laufe Runde 1</li>
+                            <li>Laufe Runde 2</li>
+                            <li>Laufe Runde 3</li>
+                            <li>... (mühsam!)</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>Mit Schleife:</strong></p>
+                        <p style="background: white; padding: 1rem; border-radius: 6px;">
+                            Wiederhole <strong>10 mal</strong>:<br>
+                            → Laufe eine Runde
+                        </p>
+                    </div>
+
+                    <div style="background: #fff4e6; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: #f59e0b;">📚 Hausaufgaben</h4>
+                        <p><strong>Aufgabe:</strong> Schreibe das 1x1 von 1 bis 10</p>
+                        <p style="background: white; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+                            Wiederhole für Zahl 1 bis 10:<br>
+                            → Schreibe: 5 × Zahl = Ergebnis
+                        </p>
+                    </div>
+                </div>
+
+                <h3>🎨 Schleifen in Scratch</h3>
+                <div style="background: #f7fafc; padding: 2rem; border-radius: 12px; margin: 2rem 0;">
+                    <h4>Drei wichtige Schleifen-Typen:</h4>
+                    
+                    <div style="margin: 1.5rem 0; padding: 1rem; background: white; border-left: 4px solid #667eea; border-radius: 4px;">
+                        <strong style="color: #667eea;">1. Wiederhole X mal</strong>
+                        <p>Führt etwas eine bestimmte Anzahl aus</p>
+                        <div style="background: #667eea; color: white; padding: 0.75rem; border-radius: 8px; margin-top: 0.5rem;">
+                            🔄 Wiederhole 10 mal:<br>
+                            <span style="margin-left: 2rem;">gehe 10 Schritte</span>
+                        </div>
+                    </div>
+
+                    <div style="margin: 1.5rem 0; padding: 1rem; background: white; border-left: 4px solid #ed8936; border-radius: 4px;">
+                        <strong style="color: #ed8936;">2. Wiederhole fortlaufend</strong>
+                        <p>Läuft unendlich weiter (bis Programm stoppt)</p>
+                        <div style="background: #ed8936; color: white; padding: 0.75rem; border-radius: 8px; margin-top: 0.5rem;">
+                            ♾️ Wiederhole fortlaufend:<br>
+                            <span style="margin-left: 2rem;">drehe dich um 15°</span>
+                        </div>
+                    </div>
+
+                    <div style="margin: 1.5rem 0; padding: 1rem; background: white; border-left: 4px solid #48bb78; border-radius: 4px;">
+                        <strong style="color: #48bb78;">3. Wiederhole bis...</strong>
+                        <p>Läuft, bis eine Bedingung erfüllt ist</p>
+                        <div style="background: #48bb78; color: white; padding: 0.75rem; border-radius: 8px; margin-top: 0.5rem;">
+                            🎯 Wiederhole bis Rand berührt:<br>
+                            <span style="margin-left: 2rem;">gehe 5 Schritte</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #fff5f5; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #f56565;">
+                    <h4 style="color: #f56565;">⚠️ Endlos-Schleifen (Vorsicht!)</h4>
+                    <p>Eine Schleife, die <strong>nie aufhört</strong>, nennt man Endlos-Schleife.</p>
+                    <p><strong>Beispiel:</strong></p>
+                    <div style="background: #2d3748; color: white; padding: 1rem; border-radius: 6px; font-family: monospace; margin-top: 0.5rem;">
+                        wiederhole fortlaufend:<br>
+                        <span style="margin-left: 2rem;">sage("Ich höre nie auf!")</span>
+                    </div>
+                    <p style="margin-top: 1rem;">Das kann das Programm zum Absturz bringen! 💥</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Tab -->
+        <div id="interactive" class="tab-content">
+            <div class="card">
+                <h2>🎮 Schleifen-Simulator</h2>
+                <p>Stelle ein, wie oft die Schleife wiederholt werden soll:</p>
+
+                <div class="loop-control">
+                    <div class="slider-container">
+                        <label style="font-size: 1.2rem; font-weight: bold; display: block; margin-bottom: 1rem;">
+                            🔄 Anzahl Wiederholungen: <span id="loopCount" style="color: #667eea;">5</span>
+                        </label>
+                        <input 
+                            type="range" 
+                            id="loopSlider" 
+                            min="1" 
+                            max="20" 
+                            value="5" 
+                            oninput="updateLoopCount()"
+                            style="width: 100%; height: 10px; border-radius: 5px;"
+                        >
+                    </div>
+
+                    <div style="margin: 2rem 0;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Wähle eine Aktion:</label>
+                        <select id="actionSelect" style="width: 100%; padding: 1rem; border-radius: 8px; font-size: 1.1rem;">
+                            <option value="star">⭐ Stern zeichnen</option>
+                            <option value="heart">❤️ Herz zeichnen</option>
+                            <option value="circle">⚫ Kreis zeichnen</option>
+                            <option value="square">🟦 Quadrat zeichnen</option>
+                            <option value="number">🔢 Zahl ausgeben</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-success btn-lg" onclick="runLoop()" style="width: 100%;">
+                        ▶️ Schleife ausführen
+                    </button>
+                </div>
+
+                <div class="pattern-visualizer" id="patternOutput">
+                    <p style="color: #a0aec0; font-size: 1.2rem;">Hier erscheint das Ergebnis...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💻 Code-Ausgabe</h2>
+                <p>Sieh, wie der Computer die Schleife Schritt für Schritt ausführt:</p>
+                <div class="output-box" id="codeOutput">
+                    <div style="color: #a0aec0;">Führe die Schleife aus, um die Ausgabe zu sehen...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🧮 Mathe-Schleife</h2>
+                <p>Erstelle eine Multiplikationstabelle mit Schleifen!</p>
+                
+                <div style="margin: 2rem 0;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">
+                        Wähle eine Zahl für die Multiplikationstabelle:
+                    </label>
+                    <input 
+                        type="number" 
+                        id="multiplyNumber" 
+                        min="1" 
+                        max="20" 
+                        value="5" 
+                        style="width: 100%; padding: 1rem; font-size: 1.2rem; border-radius: 8px; border: 2px solid #e2e8f0;"
+                    >
+                </div>
+
+                <button class="btn btn-primary" onclick="generateTable()">
+                    📊 Tabelle erstellen
+                </button>
+
+                <div id="mathOutput" style="margin-top: 2rem;"></div>
+            </div>
+        </div>
+
+        <!-- Quiz Tab -->
+        <div id="quiz" class="tab-content">
+            <div class="card">
+                <h2>✅ Wissenstest</h2>
+                <div id="quizContainer"></div>
+                <button id="checkBtn" class="btn btn-primary" onclick="checkQuiz()" style="display: none;">
+                    Antworten überprüfen
+                </button>
+                <div id="quizResult"></div>
+            </div>
+        </div>
+
+        <!-- Complete Button -->
+        <div style="text-align: center; margin: 2rem 0;">
+            <button class="btn btn-success btn-lg" onclick="completeLesson()">
+                ✓ Lektion abschließen
+            </button>
+        </div>
+    </div>
+
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+    <script>
+        requireAuth();
+        const lessonId = 'k5-06';
+        
+        const quizQuestions = [
+            {
+                question: "Was ist eine Schleife in der Programmierung?",
+                options: [
+                    "Ein Fehler im Programm",
+                    "Ein Programmteil, der mehrmals wiederholt wird",
+                    "Eine Taste auf der Tastatur",
+                    "Ein Spielcharakter"
+                ],
+                correct: 1
+            },
+            {
+                question: "Warum nutzen wir Schleifen?",
+                options: [
+                    "Um Programme langsamer zu machen",
+                    "Weil wir Code nicht mehrfach schreiben wollen",
+                    "Um Fehler zu erzeugen",
+                    "Nur zum Spaß"
+                ],
+                correct: 1
+            },
+            {
+                question: "Was ist eine Endlos-Schleife?",
+                options: [
+                    "Eine Schleife, die 10 mal läuft",
+                    "Eine Schleife, die nie aufhört",
+                    "Eine sehr schnelle Schleife",
+                    "Eine Schleife mit Fehler"
+                ],
+                correct: 1
+            },
+            {
+                question: "Welcher Scratch-Block wiederholt etwas 10 mal?",
+                options: [
+                    "Wiederhole fortlaufend",
+                    "Wenn Flagge geklickt",
+                    "Wiederhole 10 mal",
+                    "Sage Hallo"
+                ],
+                correct: 2
+            }
+        ];
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'quiz') loadQuiz();
+        }
+
+        function updateLoopCount() {
+            const count = document.getElementById('loopSlider').value;
+            document.getElementById('loopCount').textContent = count;
+        }
+
+        async function runLoop() {
+            const count = parseInt(document.getElementById('loopSlider').value);
+            const action = document.getElementById('actionSelect').value;
+            const output = document.getElementById('patternOutput');
+            const codeOutput = document.getElementById('codeOutput');
+            
+            output.innerHTML = '';
+            codeOutput.innerHTML = `<div style="color: #48bb78;">🔄 Wiederhole ${count} mal:</div>`;
+            
+            const icons = {
+                star: '⭐',
+                heart: '❤️',
+                circle: '⚫',
+                square: '🟦',
+                number: ''
+            };
+            
+            for (let i = 1; i <= count; i++) {
+                await sleep(300);
+                
+                const elem = document.createElement('span');
+                elem.style.fontSize = '3rem';
+                elem.style.margin = '0.5rem';
+                elem.style.display = 'inline-block';
+                elem.style.animation = 'fadeIn 0.5s ease';
+                
+                if (action === 'number') {
+                    elem.textContent = i;
+                } else {
+                    elem.textContent = icons[action];
+                }
+                
+                output.appendChild(elem);
+                
+                codeOutput.innerHTML += `<div style="margin-left: 2rem; margin-top: 0.5rem;">
+                    → Iteration ${i}: ${action === 'number' ? 'Gebe Zahl ' + i + ' aus' : 'Zeichne ' + icons[action]}
+                </div>`;
+            }
+            
+            codeOutput.innerHTML += `<div style="color: #48bb78; margin-top: 1rem;">✓ Schleife beendet nach ${count} Durchläufen</div>`;
+        }
+
+        function generateTable() {
+            const number = parseInt(document.getElementById('multiplyNumber').value);
+            const output = document.getElementById('mathOutput');
+            
+            output.innerHTML = `
+                <div style="background: #f7fafc; padding: 2rem; border-radius: 12px;">
+                    <h3>Multiplikationstabelle für ${number}</h3>
+                    <div style="background: #2d3748; color: #48bb78; padding: 1.5rem; border-radius: 8px; font-family: monospace; margin: 1rem 0;">
+                        <div style="color: #667eea; margin-bottom: 1rem;">wiederhole für i von 1 bis 10:</div>
+                        ${Array.from({length: 10}, (_, i) => {
+                            const result = number * (i + 1);
+                            return `<div style="margin: 0.5rem 0;">  ${number} × ${i + 1} = ${result}</div>`;
+                        }).join('')}
+                    </div>
+                    <p style="color: #48bb78; font-weight: bold;">✓ 10 Durchläufe in einer Schleife statt 10 einzelne Zeilen Code!</p>
+                </div>
+            `;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function loadQuiz() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = quizQuestions.map((q, index) => `
+                <div class="quiz-question" style="margin-bottom: 2rem; padding: 1.5rem; background: #f7fafc; border-radius: 8px;">
+                    <h3 style="color: #2d3748; margin-bottom: 1rem;">Frage ${index + 1}: ${q.question}</h3>
+                    ${q.options.map((option, i) => `
+                        <label style="display: block; padding: 0.75rem; margin: 0.5rem 0; background: white; border-radius: 6px; cursor: pointer; border: 2px solid #e2e8f0;">
+                            <input type="radio" name="question${index}" value="${i}" style="margin-right: 0.5rem;">
+                            ${option}
+                        </label>
+                    `).join('')}
+                </div>
+            `).join('');
+            
+            document.getElementById('checkBtn').style.display = 'block';
+        }
+
+        function checkQuiz() {
+            let correctCount = 0;
+            quizQuestions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="question${index}"]:checked`);
+                if (selected && parseInt(selected.value) === q.correct) correctCount++;
+            });
+            
+            const percentage = Math.round((correctCount / quizQuestions.length) * 100);
+            const passed = percentage >= 60;
+            
+            document.getElementById('quizResult').innerHTML = `
+                <div style="margin-top: 2rem; padding: 2rem; background: ${passed ? '#f0fff4' : '#fff5f5'}; border-radius: 12px; border: 2px solid ${passed ? '#48bb78' : '#f56565'};">
+                    <h3 style="color: ${passed ? '#48bb78' : '#f56565'}; font-size: 1.5rem; margin-bottom: 1rem;">
+                        ${passed ? '🎉 Bestanden!' : '❌ Noch nicht bestanden'}
+                    </h3>
+                    <p style="font-size: 1.2rem;">Du hast <strong>${correctCount} von ${quizQuestions.length}</strong> Fragen richtig beantwortet.</p>
+                    <p style="font-size: 1.5rem; font-weight: bold; color: ${passed ? '#48bb78' : '#f56565'};">Ergebnis: ${percentage}%</p>
+                </div>
+            `;
+            
+            if (passed) setTimeout(() => markLessonCompleted(getCurrentToken(), lessonId, percentage), 1000);
+        }
+
+        function completeLesson() {
+            if (confirm('Möchtest du diese Lektion als abgeschlossen markieren?')) {
+                markLessonCompleted(getCurrentToken(), lessonId, 100);
+                alert('🎉 Glückwunsch! Du hast alle Lektionen der Klasse 5 abgeschlossen!');
+                window.location.href = '../../student-dashboard.html';
+            }
+        }
+
+        markLessonInProgress(getCurrentToken(), lessonId);
+    </script>
+</body>
+</html>
