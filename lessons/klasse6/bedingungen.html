@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bedingungen in Scratch - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-orange-500 to-pink-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function BedingungenApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            const [temperature, setTemperature] = useState(20);
+            const [score1, setScore1] = useState(50);
+            const [age, setAge] = useState(10);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was ist eine Bedingung?",
+                    options: ["Eine Schleife", "Eine Überprüfung ob etwas wahr oder falsch ist", "Ein Block in Scratch", "Eine Variable"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Welcher Block in Scratch prüft eine Bedingung?",
+                    options: ["Wiederhole", "Falls...dann", "Setze Variable", "Gehe zu"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Was passiert bei 'Falls...dann...sonst', wenn die Bedingung FALSCH ist?",
+                    options: ["Der dann-Teil wird ausgeführt", "Der sonst-Teil wird ausgeführt", "Nichts passiert", "Das Programm stoppt"],
+                    correct: 1
+                },
+                {
+                    id: 4,
+                    question: "Wofür nutzt man Bedingungen?",
+                    options: ["Zum Wiederholen", "Um Entscheidungen zu treffen", "Zum Speichern von Werten", "Zum Zeichnen"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const resetQuiz = () => {
+                setQuizAnswers({});
+                setScore(0);
+                setShowResults(false);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k6-02';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const getWeatherMessage = () => {
+                if (temperature < 10) return "❄️ Es ist kalt! Zieh eine Jacke an!";
+                if (temperature < 20) return "🍂 Es ist kühl. Eine Strickjacke wäre gut.";
+                if (temperature < 30) return "☀️ Schönes Wetter! T-Shirt ist perfekt.";
+                return "🔥 Sehr heiß! Bleib im Schatten!";
+            };
+
+            const getScoreMessage = () => {
+                if (score1 >= 90) return "⭐ Hervorragend!";
+                if (score1 >= 70) return "😊 Gut gemacht!";
+                if (score1 >= 50) return "👍 Bestanden!";
+                return "📚 Noch einmal üben!";
+            };
+
+            const getAccessMessage = () => {
+                if (age < 6) return "🚫 Zu jung für diese Attraktion";
+                if (age < 12) return "👨‍👩‍👧 Nur mit Erwachsenen";
+                if (age < 18) return "✅ Zugang erlaubt";
+                return "✅ Voller Zugang";
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-6xl">❓</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Bedingungen in Scratch</h1>
+                                    <p className="text-gray-600">Wenn-Dann-Strukturen</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            {[
+                                { id: 'theory', label: '📖 Theorie' },
+                                { id: 'interactive', label: '🎮 Interaktiv' },
+                                { id: 'quiz', label: '✅ Quiz' }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex-1 px-6 py-4 font-semibold transition ${
+                                        activeTab === tab.id
+                                            ? 'bg-orange-500 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="p-8">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Was sind Bedingungen?</h2>
+                                        <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                                            Bedingungen helfen dem Computer, Entscheidungen zu treffen. 
+                                            Sie prüfen, ob etwas wahr oder falsch ist.
+                                        </p>
+                                        <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
+                                            <p className="text-orange-900 font-semibold">💡 Beispiel aus dem Alltag:</p>
+                                            <p className="text-orange-800">
+                                                <strong>FALLS</strong> es regnet, <strong>DANN</strong> nehme ich einen Regenschirm mit.
+                                                <br/>
+                                                <strong>SONST</strong> lasse ich den Schirm zu Hause.
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Bedingungen in Scratch</h2>
+                                        <div className="space-y-4">
+                                            <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-300">
+                                                <h3 className="font-bold text-blue-800 mb-2">Falls...dann</h3>
+                                                <div className="bg-blue-200 p-3 rounded font-mono text-sm">
+                                                    falls &lt;Bedingung&gt; dann<br/>
+                                                    &nbsp;&nbsp;// Mache etwas<br/>
+                                                    ende
+                                                </div>
+                                                <p className="text-blue-700 mt-2">Führt Code nur aus, wenn die Bedingung wahr ist.</p>
+                                            </div>
+
+                                            <div className="bg-green-50 p-4 rounded-lg border-2 border-green-300">
+                                                <h3 className="font-bold text-green-800 mb-2">Falls...dann...sonst</h3>
+                                                <div className="bg-green-200 p-3 rounded font-mono text-sm">
+                                                    falls &lt;Bedingung&gt; dann<br/>
+                                                    &nbsp;&nbsp;// Mache etwas<br/>
+                                                    sonst<br/>
+                                                    &nbsp;&nbsp;// Mache etwas anderes<br/>
+                                                    ende
+                                                </div>
+                                                <p className="text-green-700 mt-2">Führt entweder das eine ODER das andere aus.</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Vergleichs-Operatoren</h2>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {[
+                                                { op: '=', desc: 'gleich', ex: 'x = 5' },
+                                                { op: '>', desc: 'größer als', ex: 'x > 5' },
+                                                { op: '<', desc: 'kleiner als', ex: 'x < 5' },
+                                                { op: '≠', desc: 'ungleich', ex: 'x ≠ 5' }
+                                            ].map(item => (
+                                                <div key={item.op} className="bg-gray-50 p-4 rounded-lg border">
+                                                    <div className="text-3xl font-bold text-orange-600 mb-2">{item.op}</div>
+                                                    <div className="font-semibold">{item.desc}</div>
+                                                    <div className="text-sm text-gray-600 font-mono">{item.ex}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Praktische Beispiele</h2>
+                                        <div className="bg-purple-50 p-4 rounded-lg">
+                                            <h3 className="font-bold mb-2">🎮 Spiel-Beispiel:</h3>
+                                            <ul className="space-y-2 text-gray-700">
+                                                <li>✓ Falls Sprite den Rand berührt → Drehe um</li>
+                                                <li>✓ Falls Punktzahl &gt; 100 → Du hast gewonnen!</li>
+                                                <li>✓ Falls Taste gedrückt → Springe</li>
+                                                <li>✓ Falls Leben = 0 → Spiel beendet</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">🎮 Bedingungen ausprobieren</h2>
+                                    
+                                    <div className="bg-blue-50 p-6 rounded-lg">
+                                        <h3 className="font-bold text-blue-800 mb-4">🌡️ Wetter-Berater</h3>
+                                        <p className="mb-4">Ändere die Temperatur und sieh, was passiert:</p>
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <span>Temperatur:</span>
+                                            <input 
+                                                type="range" 
+                                                min="-10" 
+                                                max="40" 
+                                                value={temperature}
+                                                onChange={(e) => setTemperature(Number(e.target.value))}
+                                                className="flex-1"
+                                            />
+                                            <span className="font-bold text-2xl w-20">{temperature}°C</span>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-lg text-center text-xl font-bold">
+                                            {getWeatherMessage()}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-green-50 p-6 rounded-lg">
+                                        <h3 className="font-bold text-green-800 mb-4">🎯 Punktestand-Checker</h3>
+                                        <p className="mb-4">Bewege den Regler und sieh deine Bewertung:</p>
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <span>Punkte:</span>
+                                            <input 
+                                                type="range" 
+                                                min="0" 
+                                                max="100" 
+                                                value={score1}
+                                                onChange={(e) => setScore1(Number(e.target.value))}
+                                                className="flex-1"
+                                            />
+                                            <span className="font-bold text-2xl w-16">{score1}</span>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-lg text-center text-xl font-bold">
+                                            {getScoreMessage()}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-purple-50 p-6 rounded-lg">
+                                        <h3 className="font-bold text-purple-800 mb-4">🎢 Alters-Check</h3>
+                                        <p className="mb-4">Gib dein Alter ein:</p>
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <span>Alter:</span>
+                                            <input 
+                                                type="range" 
+                                                min="0" 
+                                                max="25" 
+                                                value={age}
+                                                onChange={(e) => setAge(Number(e.target.value))}
+                                                className="flex-1"
+                                            />
+                                            <span className="font-bold text-2xl w-16">{age}</span>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-lg text-center text-xl font-bold">
+                                            {getAccessMessage()}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz</h2>
+                                    {!showResults ? (
+                                        <>
+                                            {quizQuestions.map(q => (
+                                                <div key={q.id} className="bg-gray-50 p-6 rounded-lg border">
+                                                    <h3 className="font-bold text-lg mb-4">{q.id}. {q.question}</h3>
+                                                    <div className="space-y-2">
+                                                        {q.options.map((option, idx) => (
+                                                            <label
+                                                                key={idx}
+                                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition ${
+                                                                    quizAnswers[q.id] === idx
+                                                                        ? 'bg-orange-100 border-2 border-orange-500'
+                                                                        : 'bg-white border-2 border-gray-200 hover:border-orange-300'
+                                                                }`}
+                                                            >
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`q${q.id}`}
+                                                                    checked={quizAnswers[q.id] === idx}
+                                                                    onChange={() => handleQuizAnswer(q.id, idx)}
+                                                                />
+                                                                <span>{option}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <button
+                                                onClick={checkQuiz}
+                                                disabled={Object.keys(quizAnswers).length < quizQuestions.length}
+                                                className="w-full py-3 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-600 disabled:bg-gray-300"
+                                            >
+                                                Quiz auswerten
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <div className="text-center space-y-6">
+                                            <div className="text-6xl">{score >= 3 ? '🎉' : '📚'}</div>
+                                            <h3 className="text-3xl font-bold">{score} von {quizQuestions.length} richtig!</h3>
+                                            <div className="bg-gray-100 rounded-lg p-6">
+                                                <div className="text-5xl font-bold text-orange-600">
+                                                    {Math.round((score / quizQuestions.length) * 100)}%
+                                                </div>
+                                            </div>
+                                            {score >= 3 && (
+                                                <div className="bg-green-100 border border-green-300 rounded-lg p-4">
+                                                    <p className="text-green-800 font-bold">Super! Du verstehst Bedingungen! 🌟</p>
+                                                </div>
+                                            )}
+                                            <div className="flex gap-3 justify-center">
+                                                <button
+                                                    onClick={resetQuiz}
+                                                    className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                                >
+                                                    Nochmal
+                                                </button>
+                                                <button
+                                                    onClick={completeLesson}
+                                                    className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                                >
+                                                    Abschließen ✓
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<BedingungenApp />, document.getElementById('root'));
+    </script>
+    
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

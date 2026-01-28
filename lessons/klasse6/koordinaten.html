@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koordinaten und Bewegung - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-teal-500 to-cyan-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function KoordinatenApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            const [spriteX, setSpriteX] = useState(0);
+            const [spriteY, setSpriteY] = useState(0);
+            const [targetX, setTargetX] = useState(100);
+            const [targetY, setTargetY] = useState(50);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Wo ist der Punkt (0, 0) auf der Scratch-Bühne?",
+                    options: ["Oben links", "In der Mitte", "Unten rechts", "Oben rechts"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Was passiert, wenn die X-Koordinate größer wird?",
+                    options: ["Die Figur geht nach links", "Die Figur geht nach rechts", "Die Figur geht nach oben", "Die Figur geht nach unten"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Welcher Befehl setzt die Position einer Figur?",
+                    options: ["ändere x um 10", "gehe zu x: y:", "drehe um 90 Grad", "wiederhole 10 mal"],
+                    correct: 1
+                },
+                {
+                    id: 4,
+                    question: "Was bedeutet eine negative Y-Koordinate?",
+                    options: ["Oben auf der Bühne", "Unten auf der Bühne", "Links auf der Bühne", "Rechts auf der Bühne"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k6-04';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const moveSprite = (dx, dy) => {
+                setSpriteX(Math.max(-200, Math.min(200, spriteX + dx)));
+                setSpriteY(Math.max(-150, Math.min(150, spriteY + dy)));
+            };
+
+            const jumpToPosition = () => {
+                setSpriteX(targetX);
+                setSpriteY(targetY);
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">🎯</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Koordinaten und Bewegung</h1>
+                                    <p className="text-gray-600">Klasse 6 - X-Y Koordinatensystem in Scratch</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎯 Was sind Koordinaten?</h2>
+                                        <div className="bg-teal-50 border-l-4 border-teal-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Koordinaten sind wie eine Adresse auf der Bühne. Sie sagen einer Figur genau, wo sie sich befinden soll.
+                                                In Scratch nutzen wir das <strong>X-Y Koordinatensystem</strong>.
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📐 Die X-Achse</h2>
+                                        <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                            <ul className="space-y-2 text-gray-700">
+                                                <li>✅ <strong>X-Achse:</strong> Geht von links nach rechts</li>
+                                                <li>✅ <strong>X = 0:</strong> In der Mitte</li>
+                                                <li>✅ <strong>Positive X:</strong> Nach rechts (z.B. X = 100)</li>
+                                                <li>✅ <strong>Negative X:</strong> Nach links (z.B. X = -100)</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📏 Die Y-Achse</h2>
+                                        <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                            <ul className="space-y-2 text-gray-700">
+                                                <li>✅ <strong>Y-Achse:</strong> Geht von unten nach oben</li>
+                                                <li>✅ <strong>Y = 0:</strong> In der Mitte</li>
+                                                <li>✅ <strong>Positive Y:</strong> Nach oben (z.B. Y = 100)</li>
+                                                <li>✅ <strong>Negative Y:</strong> Nach unten (z.B. Y = -100)</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎮 Bewegungsbefehle</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-blue-800 mb-2">Gehe zu Position</h3>
+                                                <code className="text-sm bg-white p-2 block rounded">gehe zu x: 100 y: 50</code>
+                                                <p className="text-sm text-gray-600 mt-2">Springt direkt zu den Koordinaten</p>
+                                            </div>
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">Ändere Position</h3>
+                                                <code className="text-sm bg-white p-2 block rounded">ändere x um 10</code>
+                                                <p className="text-sm text-gray-600 mt-2">Bewegt schrittweise</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💡 Beispiel</h2>
+                                        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                                            <p className="text-gray-700 mb-2">Um eine Katze zur oberen rechten Ecke zu bewegen:</p>
+                                            <div className="bg-white p-3 rounded border-l-4 border-yellow-500">
+                                                <code className="text-sm">
+                                                    Wenn Flagge angeklickt<br/>
+                                                    gehe zu x: 200 y: 150
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎮 Koordinaten-Simulator</h2>
+                                        <div className="bg-gray-100 rounded-lg p-6">
+                                            <div className="relative bg-white border-4 border-gray-800 rounded-lg mx-auto" style={{width: '450px', height: '350px'}}>
+                                                {/* Grid */}
+                                                <svg className="absolute inset-0 w-full h-full">
+                                                    {/* Vertical center line */}
+                                                    <line x1="225" y1="0" x2="225" y2="350" stroke="#ddd" strokeWidth="2"/>
+                                                    {/* Horizontal center line */}
+                                                    <line x1="0" y1="175" x2="450" y2="175" stroke="#ddd" strokeWidth="2"/>
+                                                    {/* X-axis */}
+                                                    <line x1="0" y1="175" x2="450" y2="175" stroke="#333" strokeWidth="3"/>
+                                                    <text x="435" y="170" fill="#333" fontSize="14">X</text>
+                                                    {/* Y-axis */}
+                                                    <line x1="225" y1="0" x2="225" y2="350" stroke="#333" strokeWidth="3"/>
+                                                    <text x="230" y="15" fill="#333" fontSize="14">Y</text>
+                                                </svg>
+                                                
+                                                {/* Sprite */}
+                                                <div 
+                                                    className="absolute w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-2xl transition-all duration-300"
+                                                    style={{
+                                                        left: `${225 + spriteX - 24}px`,
+                                                        top: `${175 - spriteY - 24}px`
+                                                    }}
+                                                >
+                                                    🐱
+                                                </div>
+                                                
+                                                {/* Coordinates display */}
+                                                <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-3 py-1 rounded text-sm font-mono">
+                                                    X: {spriteX}, Y: {spriteY}
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-6 grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <h3 className="font-bold mb-3">Bewegungssteuerung:</h3>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        <div></div>
+                                                        <button onClick={() => moveSprite(0, 20)} className="bg-blue-500 text-white p-3 rounded hover:bg-blue-600">↑</button>
+                                                        <div></div>
+                                                        <button onClick={() => moveSprite(-20, 0)} className="bg-blue-500 text-white p-3 rounded hover:bg-blue-600">←</button>
+                                                        <button onClick={() => {setSpriteX(0); setSpriteY(0);}} className="bg-red-500 text-white p-3 rounded hover:bg-red-600 text-xs">Mitte</button>
+                                                        <button onClick={() => moveSprite(20, 0)} className="bg-blue-500 text-white p-3 rounded hover:bg-blue-600">→</button>
+                                                        <div></div>
+                                                        <button onClick={() => moveSprite(0, -20)} className="bg-blue-500 text-white p-3 rounded hover:bg-blue-600">↓</button>
+                                                        <div></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <h3 className="font-bold mb-3">Springe zu Position:</h3>
+                                                    <div className="space-y-2">
+                                                        <div>
+                                                            <label className="text-sm">X: {targetX}</label>
+                                                            <input 
+                                                                type="range" 
+                                                                min="-200" 
+                                                                max="200" 
+                                                                value={targetX}
+                                                                onChange={(e) => setTargetX(parseInt(e.target.value))}
+                                                                className="w-full"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-sm">Y: {targetY}</label>
+                                                            <input 
+                                                                type="range" 
+                                                                min="-150" 
+                                                                max="150" 
+                                                                value={targetY}
+                                                                onChange={(e) => setTargetY(parseInt(e.target.value))}
+                                                                className="w-full"
+                                                            />
+                                                        </div>
+                                                        <button 
+                                                            onClick={jumpToPosition}
+                                                            className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+                                                        >
+                                                            Gehe zu Position
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎯 Aufgabe: Finde die Positionen!</h2>
+                                        <div className="bg-teal-50 border-2 border-teal-300 rounded-lg p-4">
+                                            <p className="mb-3">Bewege die Katze zu diesen Positionen:</p>
+                                            <ul className="space-y-2 text-gray-700">
+                                                <li>✅ Obere rechte Ecke (X: 200, Y: 150)</li>
+                                                <li>✅ Untere linke Ecke (X: -200, Y: -150)</li>
+                                                <li>✅ Mitte oben (X: 0, Y: 150)</li>
+                                                <li>✅ Rechts Mitte (X: 200, Y: 0)</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span>{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-teal-500 text-white rounded-lg font-bold hover:bg-teal-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du hast alle Fragen richtig beantwortet!' :
+                                                 score >= 3 ? '👍 Gut gemacht! Du verstehst Koordinaten!' :
+                                                 score >= 2 ? '📚 Nicht schlecht, aber übe noch ein bisschen!' :
+                                                 '💪 Übe weiter und versuche es nochmal!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-teal-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<KoordinatenApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

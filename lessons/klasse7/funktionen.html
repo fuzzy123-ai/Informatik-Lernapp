@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funktionen definieren - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-rose-500 to-red-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function FunktionenApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            const [greetName, setGreetName] = useState('');
+            const [greetOutput, setGreetOutput] = useState('');
+            const [num1, setNum1] = useState(5);
+            const [num2, setNum2] = useState(3);
+            const [calcResult, setCalcResult] = useState(null);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was ist eine Funktion?",
+                    options: ["Eine Variable", "Ein wiederverwendbarer Code-Block", "Eine Schleife", "Eine Liste"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Wie definiert man eine Funktion in Python?",
+                    options: ["function name():", "def name():", "func name():", "define name():"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Was ist ein Parameter?",
+                    options: ["Eine Ausgabe", "Ein Eingabewert für die Funktion", "Eine Schleife", "Ein Fehler"],
+                    correct: 1
+                },
+                {
+                    id: 4,
+                    question: "Womit gibt eine Funktion ein Ergebnis zurück?",
+                    options: ["print", "return", "output", "result"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k7-04';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const callGreet = () => {
+                if (greetName) {
+                    setGreetOutput(`Hallo ${greetName}! Schön dich zu sehen! 👋`);
+                }
+            };
+
+            const calculate = (operation) => {
+                let result;
+                switch(operation) {
+                    case 'add': result = num1 + num2; break;
+                    case 'sub': result = num1 - num2; break;
+                    case 'mul': result = num1 * num2; break;
+                    case 'div': result = num2 !== 0 ? num1 / num2 : 'Division durch 0!'; break;
+                }
+                setCalcResult(result);
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">⚙️</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Funktionen definieren</h1>
+                                    <p className="text-gray-600">Klasse 7 - Wiederverwendbare Code-Blöcke</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">⚙️ Was ist eine Funktion?</h2>
+                                        <div className="bg-rose-50 border-l-4 border-rose-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Eine <strong>Funktion</strong> ist ein wiederverwendbarer Code-Block, den du mit einem Namen aufrufst.
+                                                Statt Code mehrfach zu schreiben, packst du ihn in eine Funktion und rufst sie auf, wann du sie brauchst!
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📝 Funktion definieren</h2>
+                                        <div className="bg-gray-900 text-green-400 rounded-lg p-4 font-mono mb-4">
+                                            <code>
+                                                def begruessung():<br/>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;print("Hallo!")<br/>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;print("Willkommen!")<br/>
+                                                <br/>
+                                                # Funktion aufrufen<br/>
+                                                begruessung()
+                                            </code>
+                                        </div>
+                                        <p className="text-gray-600">
+                                            Mit <code className="bg-gray-200 px-2 py-1 rounded">def</code> definierst du eine Funktion. 
+                                            Der Code nach dem Doppelpunkt muss <strong>eingerückt</strong> sein!
+                                        </p>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📥 Parameter: Eingabewerte</h2>
+                                        <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                            <p className="mb-3 text-gray-700">Funktionen können Parameter haben - Werte, die du beim Aufruf übergibst:</p>
+                                            <div className="bg-gray-900 text-green-400 p-4 rounded font-mono">
+                                                <code>
+                                                    def begruessung(name):<br/>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;print("Hallo " + name + "!")<br/>
+                                                    <br/>
+                                                    begruessung("Anna")  # Hallo Anna!<br/>
+                                                    begruessung("Max")   # Hallo Max!
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📤 Return: Rückgabewert</h2>
+                                        <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                            <p className="mb-3 text-gray-700">Mit <code>return</code> gibt eine Funktion ein Ergebnis zurück:</p>
+                                            <div className="bg-gray-900 text-green-400 p-4 rounded font-mono">
+                                                <code>
+                                                    def addiere(a, b):<br/>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;return a + b<br/>
+                                                    <br/>
+                                                    ergebnis = addiere(5, 3)<br/>
+                                                    print(ergebnis)  # 8
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔢 Mehrere Parameter</h2>
+                                        <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                                            <div className="bg-gray-900 text-green-400 p-4 rounded font-mono">
+                                                <code>
+                                                    def rechteck_flaeche(breite, hoehe):<br/>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;return breite * hoehe<br/>
+                                                    <br/>
+                                                    flaeche = rechteck_flaeche(5, 3)<br/>
+                                                    print(flaeche)  # 15
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💡 Warum Funktionen?</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">✓ Wiederverwendbar</h3>
+                                                <p className="text-sm text-gray-600">Einmal schreiben, oft nutzen</p>
+                                            </div>
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-blue-800 mb-2">✓ Übersichtlich</h3>
+                                                <p className="text-sm text-gray-600">Code bleibt strukturiert</p>
+                                            </div>
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-orange-800 mb-2">✓ Fehler vermeiden</h3>
+                                                <p className="text-sm text-gray-600">Änderungen nur an einer Stelle</p>
+                                            </div>
+                                            <div className="bg-pink-50 border-2 border-pink-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-pink-800 mb-2">✓ Teamarbeit</h3>
+                                                <p className="text-sm text-gray-600">Andere verstehen den Code besser</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📚 Beispiele aus dem Alltag</h2>
+                                        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                                            <p className="mb-2 text-gray-700">Funktionen sind wie Rezepte:</p>
+                                            <ul className="space-y-2 text-gray-700">
+                                                <li>🍕 <strong>Pizza backen:</strong> Du folgst immer den gleichen Schritten</li>
+                                                <li>📞 <strong>Telefonieren:</strong> Wählen, sprechen, auflegen - immer gleich</li>
+                                                <li>🎮 <strong>Spiel starten:</strong> Konsole an, Spiel einlegen, Start drücken</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">👋 Begrüßungs-Funktion</h2>
+                                        <div className="bg-rose-50 rounded-lg p-6">
+                                            <div className="bg-gray-900 text-green-400 p-4 rounded font-mono mb-4">
+                                                <code>
+                                                    def begruessung(name):<br/>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;return "Hallo " + name + "! 👋"
+                                                </code>
+                                            </div>
+                                            <div className="bg-white rounded-lg border-2 border-gray-300 p-4">
+                                                <label className="block font-bold mb-2">Gib deinen Namen ein:</label>
+                                                <input
+                                                    type="text"
+                                                    value={greetName}
+                                                    onChange={(e) => setGreetName(e.target.value)}
+                                                    className="w-full p-2 border-2 border-gray-300 rounded mb-3"
+                                                    placeholder="Dein Name"
+                                                />
+                                                <button 
+                                                    onClick={callGreet}
+                                                    className="w-full bg-rose-500 text-white py-3 rounded-lg hover:bg-rose-600 font-semibold"
+                                                >
+                                                    Funktion aufrufen: begruessung("{greetName}")
+                                                </button>
+                                                {greetOutput && (
+                                                    <div className="mt-4 bg-green-100 border-2 border-green-500 rounded-lg p-4 text-center">
+                                                        <p className="text-lg font-bold">{greetOutput}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🧮 Rechen-Funktionen</h2>
+                                        <div className="bg-blue-50 rounded-lg p-6">
+                                            <div className="bg-white rounded-lg border-2 border-gray-300 p-4 mb-4">
+                                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                                    <div>
+                                                        <label className="block font-bold mb-2">Zahl 1:</label>
+                                                        <input
+                                                            type="number"
+                                                            value={num1}
+                                                            onChange={(e) => setNum1(parseFloat(e.target.value) || 0)}
+                                                            className="w-full p-2 border-2 border-gray-300 rounded"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block font-bold mb-2">Zahl 2:</label>
+                                                        <input
+                                                            type="number"
+                                                            value={num2}
+                                                            onChange={(e) => setNum2(parseFloat(e.target.value) || 0)}
+                                                            className="w-full p-2 border-2 border-gray-300 rounded"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <button onClick={() => calculate('add')} className="bg-green-500 text-white py-2 rounded hover:bg-green-600">+ Addieren</button>
+                                                    <button onClick={() => calculate('sub')} className="bg-orange-500 text-white py-2 rounded hover:bg-orange-600">- Subtrahieren</button>
+                                                    <button onClick={() => calculate('mul')} className="bg-purple-500 text-white py-2 rounded hover:bg-purple-600">× Multiplizieren</button>
+                                                    <button onClick={() => calculate('div')} className="bg-red-500 text-white py-2 rounded hover:bg-red-600">÷ Dividieren</button>
+                                                </div>
+                                                {calcResult !== null && (
+                                                    <div className="mt-4 bg-blue-100 border-2 border-blue-500 rounded-lg p-4 text-center">
+                                                        <p className="text-2xl font-bold">Ergebnis: {calcResult}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="bg-gray-900 text-green-400 p-3 rounded font-mono text-sm">
+                                                <code>
+                                                    def addiere(a, b): return a + b<br/>
+                                                    def subtrahiere(a, b): return a - b<br/>
+                                                    def multipliziere(a, b): return a * b<br/>
+                                                    def dividiere(a, b): return a / b
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📚 Weitere Beispiele</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                                                <h3 className="font-bold mb-2">Ist gerade?</h3>
+                                                <code className="text-xs bg-gray-900 text-green-400 p-2 block rounded whitespace-pre">
+{`def ist_gerade(zahl):
+    return zahl % 2 == 0
+
+print(ist_gerade(4))  # True
+print(ist_gerade(7))  # False`}
+                                                </code>
+                                            </div>
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold mb-2">Kreisfläche</h3>
+                                                <code className="text-xs bg-gray-900 text-green-400 p-2 block rounded whitespace-pre">
+{`def kreis_flaeche(radius):
+    pi = 3.14
+    return pi * radius * radius
+
+print(kreis_flaeche(5))  # 78.5`}
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="font-mono text-sm">{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-rose-500 text-white rounded-lg font-bold hover:bg-rose-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-rose-500 to-red-500 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du verstehst Funktionen!' :
+                                                 score >= 3 ? '👍 Sehr gut!' :
+                                                 score >= 2 ? '📚 Übe noch etwas!' :
+                                                 '💪 Schau dir die Theorie nochmal an!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-rose-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<FunktionenApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>
