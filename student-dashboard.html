@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Lektionen - Informatik Lernapp</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>💻 Meine Lektionen</h1>
+            <div class="header-info">
+                <div id="studentInfo" style="text-align: right; margin-right: 1rem;">
+                    <div style="font-weight: 600; color: #2d3748;" id="studentName"></div>
+                    <div style="font-size: 0.9rem; color: #718096;" id="studentClass"></div>
+                </div>
+                <div class="token-display" id="tokenDisplay"></div>
+                <button class="btn btn-danger" onclick="logout()">Abmelden</button>
+            </div>
+        </div>
+
+        <!-- Progress Card -->
+        <div class="card">
+            <h2 style="margin-bottom: 1rem;">Dein Fortschritt</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0%</div>
+            </div>
+            <p style="margin-top: 0.5rem; color: #718096; text-align: center;" id="progressText">
+                0 von 0 Lektionen abgeschlossen
+            </p>
+        </div>
+
+        <!-- Lessons Grid -->
+        <div id="lessonsContainer" class="grid grid-3"></div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/progress.js"></script>
+    <script>
+        // Auth Check
+        requireAuth('student');
+
+        const session = getCurrentSession();
+        const user = getUserData(session.token);
+
+        if (!user) {
+            logout();
+        }
+
+        // User Info anzeigen
+        document.getElementById('studentName').textContent = user.name;
+        document.getElementById('studentClass').textContent = `Klasse ${user.class}`;
+        document.getElementById('tokenDisplay').textContent = session.token;
+
+        // Curriculum direkt eingebunden (wegen CORS bei file://)
+        const curriculum = {
+            "classes": {
+                "5a": { "name": "Klasse 5a", "grade": 5 },
+                "5b": { "name": "Klasse 5b", "grade": 5 },
+                "5c": { "name": "Klasse 5c", "grade": 5 },
+                "5d": { "name": "Klasse 5d", "grade": 5 },
+                "6a": { "name": "Klasse 6a", "grade": 6 },
+                "6b": { "name": "Klasse 6b", "grade": 6 },
+                "6c": { "name": "Klasse 6c", "grade": 6 },
+                "6d": { "name": "Klasse 6d", "grade": 6 },
+                "7a": { "name": "Klasse 7a", "grade": 7 },
+                "7b": { "name": "Klasse 7b", "grade": 7 },
+                "7c": { "name": "Klasse 7c", "grade": 7 },
+                "7d": { "name": "Klasse 7d", "grade": 7 },
+                "8a": { "name": "Klasse 8a", "grade": 8 },
+                "8b": { "name": "Klasse 8b", "grade": 8 },
+                "8c": { "name": "Klasse 8c", "grade": 8 },
+                "8d": { "name": "Klasse 8d", "grade": 8 },
+                "9a": { "name": "Klasse 9a", "grade": 9 },
+                "9b": { "name": "Klasse 9b", "grade": 9 },
+                "9c": { "name": "Klasse 9c", "grade": 9 },
+                "9d": { "name": "Klasse 9d", "grade": 9 },
+                "10a": { "name": "Klasse 10a", "grade": 10 },
+                "10b": { "name": "Klasse 10b", "grade": 10 },
+                "10c": { "name": "Klasse 10c", "grade": 10 },
+                "10d": { "name": "Klasse 10d", "grade": 10 }
+            },
+            "lessons": {
+                "5": [
+                    { "id": "k5-01", "title": "Was ist ein Computer?", "icon": "💻", "description": "Grundlagen der Computertechnik", "path": "lessons/klasse5/was_ist_ein_computer.html", "terms": ["Computer", "Hardware", "Software"] },
+                    { "id": "k5-02", "title": "Eingabe und Ausgabe", "icon": "⌨️", "description": "Eingabe- und Ausgabegeräte", "path": "lessons/klasse5/eingabe_ausgabe.html", "terms": ["Eingabe", "Ausgabe", "Peripherie"] },
+                    { "id": "k5-03", "title": "Das Binärsystem", "icon": "🔢", "description": "Zahlen im Binärsystem", "path": "lessons/klasse5/binaersystem.html", "terms": ["Binär", "Bit", "Byte"] },
+                    { "id": "k5-04", "title": "Erste Schritte mit Scratch", "icon": "🐱", "description": "Einführung in Scratch", "path": "lessons/klasse5/scratch_intro.html", "terms": ["Scratch", "Block", "Sprite"] },
+                    { "id": "k5-05", "title": "Sequenzen programmieren", "icon": "➡️", "description": "Befehle nacheinander", "path": "lessons/klasse5/sequenzen.html", "terms": ["Sequenz", "Befehl", "Reihenfolge"] },
+                    { "id": "k5-06", "title": "Schleifen verstehen", "icon": "🔄", "description": "Wiederholungen in Programmen", "path": "lessons/klasse5/schleifen.html", "terms": ["Schleife", "Wiederholung", "Loop"] }
+                ],
+                "6": [
+                    { "id": "k6-01", "title": "Dateien und Ordner", "icon": "📁", "description": "Dateisystem verstehen", "path": "lessons/klasse6/dateien_ordner.html", "terms": ["Datei", "Ordner", "Verzeichnis"] },
+                    { "id": "k6-02", "title": "Bedingungen in Scratch", "icon": "❓", "description": "Wenn-Dann-Strukturen", "path": "lessons/klasse6/bedingungen.html", "terms": ["Bedingung", "IF-ELSE", "Verzweigung"] },
+                    { "id": "k6-03", "title": "Variablen nutzen", "icon": "📦", "description": "Werte speichern und nutzen", "path": "lessons/klasse6/variablen.html", "terms": ["Variable", "Speicher", "Wert"] },
+                    { "id": "k6-04", "title": "Koordinaten und Bewegung", "icon": "🎯", "description": "X-Y-Koordinatensystem", "path": "lessons/klasse6/koordinaten.html", "terms": ["Koordinate", "Position", "X-Y"] }
+                ],
+                "7": [
+                    { "id": "k7-01", "title": "Algorithmen verstehen", "icon": "📋", "description": "Was sind Algorithmen?", "path": "lessons/klasse7/algorithmen.html", "terms": ["Algorithmus", "Ablauf", "Prozess"] },
+                    { "id": "k7-02", "title": "Python Grundlagen", "icon": "🐍", "description": "Erste Schritte in Python", "path": "lessons/klasse7/python_basics.html", "terms": ["Python", "print", "input"] },
+                    { "id": "k7-03", "title": "Listen und Arrays", "icon": "📊", "description": "Datensammlungen verwalten", "path": "lessons/klasse7/listen.html", "terms": ["Liste", "Array", "Index"] },
+                    { "id": "k7-04", "title": "Funktionen definieren", "icon": "⚙️", "description": "Code wiederverwenden", "path": "lessons/klasse7/funktionen.html", "terms": ["Funktion", "Parameter", "Return"] }
+                ],
+                "8": [
+                    { "id": "k8-01", "title": "Sortieralgorithmen", "icon": "🔢", "description": "Bubble Sort verstehen", "path": "lessons/klasse8/bubble_sort.html", "terms": ["Sortieren", "Bubble Sort", "Vergleichen"] },
+                    { "id": "k8-02", "title": "Suchalgorithmen", "icon": "🔍", "description": "Lineare und binäre Suche", "path": "lessons/klasse8/suchalgorithmen.html", "terms": ["Suche", "Binär", "Linear"] },
+                    { "id": "k8-03", "title": "HTML Basics", "icon": "🌐", "description": "Webseiten strukturieren", "path": "lessons/klasse8/html_basics.html", "terms": ["HTML", "Tag", "Element"] },
+                    { "id": "k8-04", "title": "CSS Styling", "icon": "🎨", "description": "Webseiten gestalten", "path": "lessons/klasse8/css_basics.html", "terms": ["CSS", "Style", "Selector"] },
+                    { "id": "k8-05", "title": "Datenbanken", "icon": "🗄️", "description": "Daten strukturiert speichern", "path": "lessons/klasse8/datenbanken.html", "terms": ["Datenbank", "Tabelle", "SQL"] }
+                ],
+                "9": [
+                    { "id": "k9-01", "title": "Objektorientierung", "icon": "🎭", "description": "Klassen und Objekte", "path": "lessons/klasse9/oop.html", "terms": ["OOP", "Klasse", "Objekt"] },
+                    { "id": "k9-02", "title": "Dijkstra Algorithmus", "icon": "🗺️", "description": "Kürzeste Wege finden", "path": "lessons/klasse9/dijkstra.html", "terms": ["Dijkstra", "Graph", "Pfad"] },
+                    { "id": "k9-03", "title": "Rekursion", "icon": "🔁", "description": "Funktionen rufen sich selbst auf", "path": "lessons/klasse9/rekursion.html", "terms": ["Rekursion", "Selbstaufruf", "Basis"] },
+                    { "id": "k9-04", "title": "JavaScript Basics", "icon": "⚡", "description": "Dynamische Webseiten", "path": "lessons/klasse9/javascript.html", "terms": ["JavaScript", "Event", "DOM"] },
+                    { "id": "k9-05", "title": "Netzwerke", "icon": "🌐", "description": "Internet und Protokolle", "path": "lessons/klasse9/netzwerke.html", "terms": ["Netzwerk", "IP", "Protokoll"] },
+                    { "id": "k9-06", "title": "Verschlüsselung", "icon": "🔐", "description": "Daten sicher übertragen", "path": "lessons/klasse9/verschluesselung.html", "terms": ["Verschlüsselung", "Hash", "RSA"] }
+                ],
+                "10": [
+                    { "id": "k10-01", "title": "Komplexität", "icon": "📈", "description": "Big-O Notation verstehen", "path": "lessons/klasse10/komplexitaet.html", "terms": ["Komplexität", "Big-O", "Laufzeit"] },
+                    { "id": "k10-02", "title": "KI Grundlagen", "icon": "🤖", "description": "Maschinelles Lernen", "path": "lessons/klasse10/ki_grundlagen.html", "terms": ["KI", "ML", "Neuronales Netz"] },
+                    { "id": "k10-03", "title": "Git und Versionskontrolle", "icon": "🔀", "description": "Teamarbeit organisieren", "path": "lessons/klasse10/git.html", "terms": ["Git", "Commit", "Branch"] }
+                ]
+            }
+        };
+        
+        window.curriculum = curriculum;
+        const grade = curriculum.classes[user.class].grade;
+        const lessons = curriculum.lessons[grade] || [];
+        
+        renderLessons(lessons, session.token, grade);
+        updateProgress(lessons, session.token);
+
+        function renderLessons(lessons, token, grade) {
+            const container = document.getElementById('lessonsContainer');
+            container.innerHTML = '';
+
+            lessons.forEach((lesson, index) => {
+                const status = getLessonStatus(token, lesson.id, lessons);
+                const statusIcon = {
+                    'locked': '🔒',
+                    'unlocked': '📂',
+                    'in-progress': '📖',
+                    'completed': '✅'
+                }[status];
+
+                const card = document.createElement('div');
+                card.className = `lesson-card ${status === 'unlocked' ? '' : status}`;
+                
+                if (status !== 'locked') {
+                    card.onclick = () => openLesson(lesson, token);
+                    card.style.cursor = 'pointer';
+                } else {
+                    card.style.cursor = 'not-allowed';
+                }
+
+                card.innerHTML = `
+                    <span class="lesson-status">${statusIcon}</span>
+                    <div class="lesson-icon">${lesson.icon}</div>
+                    <h3 class="lesson-title">${lesson.title}</h3>
+                    <p class="lesson-description">${lesson.description}</p>
+                    <div style="margin-top: auto;">
+                        ${lesson.terms.map(term => 
+                            `<span style="display: inline-block; background: #edf2f7; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; margin: 0.2rem;">${term}</span>`
+                        ).join('')}
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function updateProgress(lessons, token) {
+            const progress = getProgress(token);
+            const completed = lessons.filter(l => 
+                progress[l.id]?.status === 'completed'
+            ).length;
+            
+            const percentage = Math.round((completed / lessons.length) * 100);
+            
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressBar').textContent = percentage + '%';
+            document.getElementById('progressText').textContent = 
+                `${completed} von ${lessons.length} Lektionen abgeschlossen`;
+        }
+
+        function openLesson(lesson, token) {
+            // Lektion als "in Bearbeitung" markieren
+            startLesson(token, lesson.id);
+            
+            // Zur Lektions-Seite navigieren
+            window.location.href = lesson.path + '?token=' + token + '&lessonId=' + lesson.id;
+        }
+    </script>
+</body>
+</html>

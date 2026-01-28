@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informatik Lernapp - Login</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card" style="max-width: 600px; margin: 4rem auto; text-align: center;">
+            <h1 style="color: #667eea; margin-bottom: 2rem;">
+                💻 Informatik Lernapp
+            </h1>
+            <p style="color: #718096; margin-bottom: 3rem; font-size: 1.1rem;">
+                Interaktives Lernen für Klasse 5-10
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <button class="btn btn-primary" onclick="openStudentLogin()" style="padding: 1.25rem; font-size: 1.1rem;">
+                    👨‍🎓 Schüler Login / Registrierung
+                </button>
+                <button class="btn btn-secondary" onclick="openTeacherLogin()" style="padding: 1.25rem; font-size: 1.1rem;">
+                    👨‍🏫 Lehrer Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Schüler Bereich</h2>
+            </div>
+            
+            <!-- Login Tab -->
+            <div id="loginTab">
+                <h3 style="margin-bottom: 1rem;">Mit Token anmelden</h3>
+                <div class="form-group">
+                    <label>Dein Token (6 Zeichen):</label>
+                    <input type="text" id="loginToken" maxlength="6" placeholder="ABC123" style="text-transform: uppercase;">
+                </div>
+                <button class="btn btn-primary" onclick="studentLogin()" style="width: 100%;">
+                    Anmelden
+                </button>
+                <p style="text-align: center; margin: 1.5rem 0; color: #718096;">oder</p>
+                <button class="btn btn-secondary" onclick="showRegister()" style="width: 100%;">
+                    Neu registrieren
+                </button>
+            </div>
+            
+            <!-- Register Tab -->
+            <div id="registerTab" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">Registrierung</h3>
+                <div class="form-group">
+                    <label>Dein Name:</label>
+                    <input type="text" id="registerName" placeholder="Max Mustermann">
+                </div>
+                <div class="form-group">
+                    <label>Deine Klasse:</label>
+                    <select id="registerClass">
+                        <option value="">-- Klasse wählen --</option>
+                        <optgroup label="Klasse 5">
+                            <option value="5a">5a</option>
+                            <option value="5b">5b</option>
+                            <option value="5c">5c</option>
+                            <option value="5d">5d</option>
+                        </optgroup>
+                        <optgroup label="Klasse 6">
+                            <option value="6a">6a</option>
+                            <option value="6b">6b</option>
+                            <option value="6c">6c</option>
+                            <option value="6d">6d</option>
+                        </optgroup>
+                        <optgroup label="Klasse 7">
+                            <option value="7a">7a</option>
+                            <option value="7b">7b</option>
+                            <option value="7c">7c</option>
+                            <option value="7d">7d</option>
+                        </optgroup>
+                        <optgroup label="Klasse 8">
+                            <option value="8a">8a</option>
+                            <option value="8b">8b</option>
+                            <option value="8c">8c</option>
+                            <option value="8d">8d</option>
+                        </optgroup>
+                        <optgroup label="Klasse 9">
+                            <option value="9a">9a</option>
+                            <option value="9b">9b</option>
+                            <option value="9c">9c</option>
+                            <option value="9d">9d</option>
+                        </optgroup>
+                        <optgroup label="Klasse 10">
+                            <option value="10a">10a</option>
+                            <option value="10b">10b</option>
+                            <option value="10c">10c</option>
+                            <option value="10d">10d</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="studentRegister()" style="width: 100%;">
+                    Registrieren
+                </button>
+                <button class="btn btn-secondary" onclick="showLogin()" style="width: 100%; margin-top: 0.5rem;">
+                    Zurück zum Login
+                </button>
+                <div id="registerResult" style="margin-top: 1rem;"></div>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="closeModal('studentModal')" style="width: 100%; margin-top: 1.5rem;">
+                Abbrechen
+            </button>
+        </div>
+    </div>
+
+    <!-- Teacher Modal -->
+    <div id="teacherModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Lehrer Login</h2>
+            </div>
+            <div class="form-group">
+                <label>Passwort:</label>
+                <input type="password" id="teacherPassword" placeholder="Lehrer-Passwort">
+            </div>
+            <button class="btn btn-primary" onclick="teacherLogin()" style="width: 100%;">
+                Anmelden
+            </button>
+            <button class="btn btn-secondary" onclick="closeModal('teacherModal')" style="width: 100%; margin-top: 0.5rem;">
+                Abbrechen
+            </button>
+            <div id="teacherError" style="color: #f56565; margin-top: 1rem; display: none;">
+                Falsches Passwort!
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/progress.js"></script>
+    <script>
+        // Modal öffnen/schließen
+        function openStudentLogin() {
+            document.getElementById('studentModal').classList.add('active');
+        }
+
+        function openTeacherLogin() {
+            document.getElementById('teacherModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Zwischen Login und Registrierung wechseln
+        function showRegister() {
+            document.getElementById('loginTab').style.display = 'none';
+            document.getElementById('registerTab').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('loginTab').style.display = 'block';
+            document.getElementById('registerTab').style.display = 'none';
+            document.getElementById('registerResult').innerHTML = '';
+        }
+
+        // Student Login
+        function studentLogin() {
+            const token = document.getElementById('loginToken').value.trim().toUpperCase();
+            
+            if (token.length !== 6) {
+                alert('Bitte gib einen 6-stelligen Token ein!');
+                return;
+            }
+            
+            const user = loginWithToken(token);
+            if (user) {
+                window.location.href = 'student-dashboard.html';
+            } else {
+                alert('Token nicht gefunden! Bitte registriere dich zuerst.');
+            }
+        }
+
+        // Student Registrierung
+        function studentRegister() {
+            const name = document.getElementById('registerName').value.trim();
+            const className = document.getElementById('registerClass').value;
+            
+            if (!name || !className) {
+                alert('Bitte fülle alle Felder aus!');
+                return;
+            }
+            
+            const token = registerStudent(name, className);
+            
+            document.getElementById('registerResult').innerHTML = `
+                <div style="background: #48bb78; color: white; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <h3 style="margin-bottom: 0.5rem;">Erfolgreich registriert!</h3>
+                    <p style="margin-bottom: 1rem;">Dein persönlicher Token:</p>
+                    <div style="background: white; color: #48bb78; padding: 1rem; border-radius: 8px; font-size: 2rem; font-weight: bold; font-family: monospace; margin-bottom: 1rem;">
+                        ${token}
+                    </div>
+                    <p style="font-size: 0.9rem; margin-bottom: 1rem;">
+                        ⚠️ Merke dir diesen Token! Du brauchst ihn zum Anmelden.
+                    </p>
+                    <button class="btn btn-primary" onclick="useNewToken('${token}')" style="background: white; color: #48bb78;">
+                        Jetzt anmelden
+                    </button>
+                </div>
+            `;
+        }
+
+        function useNewToken(token) {
+            loginWithToken(token);
+            window.location.href = 'student-dashboard.html';
+        }
+
+        // Teacher Login
+        function teacherLogin() {
+            const password = document.getElementById('teacherPassword').value;
+            
+            if (loginTeacher(password)) {
+                window.location.href = 'teacher-dashboard.html';
+            } else {
+                document.getElementById('teacherError').style.display = 'block';
+            }
+        }
+
+        // Enter-Taste Support
+        document.getElementById('loginToken')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') studentLogin();
+        });
+
+        document.getElementById('teacherPassword')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') teacherLogin();
+        });
+
+        // Session Check
+        const session = getCurrentSession();
+        if (session) {
+            if (session.role === 'teacher') {
+                window.location.href = 'teacher-dashboard.html';
+            } else if (session.role === 'student') {
+                window.location.href = 'student-dashboard.html';
+            }
+        }
+    </script>
+</body>
+</html>

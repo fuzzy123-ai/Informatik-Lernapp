@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dateien und Ordner - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-green-500 to-teal-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function FilesAndFoldersApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [fileSystem, setFileSystem] = useState({
+                name: 'Mein Computer',
+                type: 'folder',
+                children: [
+                    {
+                        name: 'Dokumente',
+                        type: 'folder',
+                        children: [
+                            { name: 'Hausaufgaben.docx', type: 'file', size: '24 KB' },
+                            { name: 'Brief.pdf', type: 'file', size: '156 KB' }
+                        ]
+                    },
+                    {
+                        name: 'Bilder',
+                        type: 'folder',
+                        children: [
+                            { name: 'Urlaub.jpg', type: 'file', size: '2.3 MB' },
+                            { name: 'Familie.png', type: 'file', size: '1.8 MB' }
+                        ]
+                    },
+                    {
+                        name: 'Musik',
+                        type: 'folder',
+                        children: []
+                    }
+                ]
+            });
+            const [expandedFolders, setExpandedFolders] = useState(['Mein Computer']);
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was ist ein Ordner?",
+                    options: ["Ein Programm", "Ein Container für Dateien", "Eine Website", "Eine Tastenkombination"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Welche Dateiendung hat ein Word-Dokument?",
+                    options: [".jpg", ".mp3", ".docx", ".exe"],
+                    correct: 2
+                },
+                {
+                    id: 3,
+                    question: "Was bedeutet die Dateiendung .pdf?",
+                    options: ["Bilddatei", "Musikdatei", "Portable Document Format", "Programmdatei"],
+                    correct: 2
+                },
+                {
+                    id: 4,
+                    question: "Wie nennt man die Struktur von Ordnern und Unterordnern?",
+                    options: ["Dateipfad", "Ordnerbaum", "Verzeichnisstruktur", "Alle Antworten sind richtig"],
+                    correct: 3
+                }
+            ];
+
+            const toggleFolder = (folderName) => {
+                setExpandedFolders(prev => 
+                    prev.includes(folderName)
+                        ? prev.filter(f => f !== folderName)
+                        : [...prev, folderName]
+                );
+            };
+
+            const renderFileTree = (node, level = 0) => {
+                const isExpanded = expandedFolders.includes(node.name);
+                
+                return (
+                    <div key={node.name} style={{ marginLeft: `${level * 24}px` }} className="select-none">
+                        <div
+                            onClick={() => node.type === 'folder' && toggleFolder(node.name)}
+                            className={`flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-green-100 transition ${
+                                node.type === 'folder' ? 'font-semibold' : ''
+                            }`}
+                        >
+                            <span className="text-xl">
+                                {node.type === 'folder' 
+                                    ? (isExpanded ? '📂' : '📁')
+                                    : '📄'
+                                }
+                            </span>
+                            <span>{node.name}</span>
+                            {node.size && <span className="text-sm text-gray-500 ml-auto">{node.size}</span>}
+                        </div>
+                        {node.type === 'folder' && isExpanded && node.children && (
+                            <div>
+                                {node.children.map(child => renderFileTree(child, level + 1))}
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = urlParams.get('lessonId');
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                    window.location.href = '../../student-dashboard.html';
+                }
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-6xl">📁</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Dateien und Ordner</h1>
+                                    <p className="text-gray-600">Dateisystem verstehen</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            {[
+                                { id: 'theory', label: '📚 Theorie' },
+                                { id: 'interactive', label: '🗂️ Explorer' },
+                                { id: 'quiz', label: '❓ Quiz' }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex-1 px-6 py-4 font-semibold transition ${
+                                        activeTab === tab.id
+                                            ? 'bg-green-500 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="p-8">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Was sind Dateien?</h2>
+                                        <p className="text-gray-700 text-lg mb-4">
+                                            Dateien sind wie digitale Dokumente, die Informationen enthalten. 
+                                            Jede Datei hat einen <strong>Namen</strong> und eine <strong>Dateiendung</strong>.
+                                        </p>
+                                        <div className="bg-green-50 p-6 rounded-lg">
+                                            <h3 className="font-bold mb-3 text-green-800">Dateiendungen zeigen den Dateityp:</h3>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {[
+                                                    { ext: '.docx', desc: 'Word-Dokument', icon: '📝' },
+                                                    { ext: '.pdf', desc: 'PDF-Dokument', icon: '📄' },
+                                                    { ext: '.jpg / .png', desc: 'Bilddateien', icon: '🖼️' },
+                                                    { ext: '.mp3', desc: 'Musikdatei', icon: '🎵' },
+                                                    { ext: '.mp4', desc: 'Videodatei', icon: '🎬' },
+                                                    { ext: '.exe', desc: 'Programmdatei', icon: '⚙️' }
+                                                ].map(item => (
+                                                    <div key={item.ext} className="flex items-center gap-2 bg-white p-3 rounded border">
+                                                        <span className="text-2xl">{item.icon}</span>
+                                                        <div>
+                                                            <div className="font-mono font-bold text-green-700">{item.ext}</div>
+                                                            <div className="text-sm text-gray-600">{item.desc}</div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Was sind Ordner?</h2>
+                                        <p className="text-gray-700 text-lg mb-4">
+                                            Ordner (auch <em>Verzeichnisse</em> genannt) sind Container, um Dateien zu organisieren.
+                                            Man kann Ordner in Ordner erstellen - das nennt man <strong>Unterordner</strong>.
+                                        </p>
+                                        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                                            <p className="text-blue-900"><strong>Beispiel einer Ordnerstruktur:</strong></p>
+                                            <pre className="mt-2 text-blue-800 font-mono text-sm">
+{`Mein Computer
+├── Dokumente
+│   ├── Schule
+│   └── Privat
+├── Bilder
+│   ├── Urlaub 2025
+│   └── Familie
+└── Musik`}
+                                            </pre>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Wichtige Begriffe</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {[
+                                                { term: 'Dateiname', desc: 'Der Name einer Datei (z.B. "Hausaufgaben")' },
+                                                { term: 'Dateiendung', desc: 'Zeigt den Dateityp (z.B. .pdf, .jpg)' },
+                                                { term: 'Ordner', desc: 'Container zum Organisieren von Dateien' },
+                                                { term: 'Verzeichnisstruktur', desc: 'Die Organisation von Ordnern und Unterordnern' }
+                                            ].map(item => (
+                                                <div key={item.term} className="bg-gray-50 p-4 rounded-lg border">
+                                                    <h3 className="font-bold text-green-600 mb-2">{item.term}</h3>
+                                                    <p className="text-gray-600 text-sm">{item.desc}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">🗂️ Datei-Explorer</h2>
+                                    <p className="text-gray-700 mb-4">
+                                        Klicke auf die Ordner, um sie zu öffnen oder zu schließen!
+                                    </p>
+                                    <div className="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-lg border-2 border-green-200">
+                                        {renderFileTree(fileSystem)}
+                                    </div>
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <p className="text-blue-800">
+                                            <strong>💡 Tipp:</strong> In echten Computern kannst du mit Rechtsklick neue Ordner erstellen und Dateien verschieben!
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">❓ Quiz</h2>
+                                    {!showResults ? (
+                                        <>
+                                            {quizQuestions.map(q => (
+                                                <div key={q.id} className="bg-gray-50 p-6 rounded-lg border">
+                                                    <h3 className="font-bold text-lg mb-4">{q.id}. {q.question}</h3>
+                                                    <div className="space-y-2">
+                                                        {q.options.map((option, idx) => (
+                                                            <label
+                                                                key={idx}
+                                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition ${
+                                                                    quizAnswers[q.id] === idx
+                                                                        ? 'bg-green-100 border-2 border-green-500'
+                                                                        : 'bg-white border-2 border-gray-200 hover:border-green-300'
+                                                                }`}
+                                                            >
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`q${q.id}`}
+                                                                    checked={quizAnswers[q.id] === idx}
+                                                                    onChange={() => handleQuizAnswer(q.id, idx)}
+                                                                />
+                                                                <span>{option}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <button
+                                                onClick={checkQuiz}
+                                                disabled={Object.keys(quizAnswers).length < quizQuestions.length}
+                                                className="w-full py-3 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 disabled:bg-gray-300"
+                                            >
+                                                Quiz auswerten
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <div className="text-center space-y-6">
+                                            <div className="text-6xl">{score >= 3 ? '🎉' : '📚'}</div>
+                                            <h3 className="text-3xl font-bold">{score} von {quizQuestions.length} richtig!</h3>
+                                            <div className="bg-gray-100 rounded-lg p-6">
+                                                <div className="text-5xl font-bold text-green-600">
+                                                    {Math.round((score / quizQuestions.length) * 100)}%
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-3 justify-center">
+                                                <button
+                                                    onClick={() => { setShowResults(false); setQuizAnswers({}); }}
+                                                    className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                                >
+                                                    Nochmal
+                                                </button>
+                                                <button
+                                                    onClick={completeLesson}
+                                                    className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                                >
+                                                    Abschließen ✓
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<FilesAndFoldersApp />, document.getElementById('root'));
+    </script>
+    
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

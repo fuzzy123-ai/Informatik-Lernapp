@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Was ist ein Computer? - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-500 to-purple-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function ComputerLearningApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            const [draggedItem, setDraggedItem] = useState(null);
+            const [categoryItems, setCategoryItems] = useState({
+                hardware: [],
+                software: [],
+                peripherie: []
+            });
+
+            const items = [
+                { id: 1, name: 'Tastatur', category: 'hardware' },
+                { id: 2, name: 'Windows', category: 'software' },
+                { id: 3, name: 'Bildschirm', category: 'peripherie' },
+                { id: 4, name: 'Microsoft Word', category: 'software' },
+                { id: 5, name: 'Prozessor (CPU)', category: 'hardware' },
+                { id: 6, name: 'Maus', category: 'peripherie' },
+                { id: 7, name: 'Festplatte', category: 'hardware' },
+                { id: 8, name: 'Chrome Browser', category: 'software' }
+            ];
+
+            const [availableItems, setAvailableItems] = useState([...items]);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was bedeutet CPU?",
+                    options: ["Computer Processing Unit", "Central Processing Unit", "Central Program Unit", "Computer Program Unit"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Welches ist KEINE Hardware-Komponente?",
+                    options: ["Festplatte", "Arbeitsspeicher", "Microsoft Word", "Grafikkarte"],
+                    correct: 2
+                },
+                {
+                    id: 3,
+                    question: "Was ist Software?",
+                    options: ["Die Tastatur", "Programme und Apps", "Der Bildschirm", "Die Maus"],
+                    correct: 1
+                },
+                {
+                    id: 4,
+                    question: "Wozu dient der Arbeitsspeicher (RAM)?",
+                    options: ["Zum Anzeigen von Bildern", "Zum Speichern von Daten während der Arbeit", "Zum Drucken", "Zum Surfen im Internet"],
+                    correct: 1
+                }
+            ];
+
+            const handleDragStart = (item) => {
+                setDraggedItem(item);
+            };
+
+            const handleDrop = (category) => {
+                if (draggedItem) {
+                    if (draggedItem.category === category) {
+                        setCategoryItems({
+                            ...categoryItems,
+                            [category]: [...categoryItems[category], draggedItem]
+                        });
+                        setAvailableItems(availableItems.filter(item => item.id !== draggedItem.id));
+                    }
+                    setDraggedItem(null);
+                }
+            };
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({
+                    ...quizAnswers,
+                    [questionId]: answerIndex
+                });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const resetQuiz = () => {
+                setQuizAnswers({});
+                setScore(0);
+                setShowResults(false);
+            };
+
+            const resetDragDrop = () => {
+                setCategoryItems({
+                    hardware: [],
+                    software: [],
+                    peripherie: []
+                });
+                setAvailableItems([...items]);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = urlParams.get('lessonId');
+                
+                if (token && lessonId) {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    if (typeof window.completeLesson === 'function') {
+                        window.completeLesson(token, lessonId, finalScore);
+                    }
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                    window.location.href = '../../student-dashboard.html';
+                }
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    {/* Header */}
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-6xl">💻</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Was ist ein Computer?</h1>
+                                    <p className="text-gray-600">Grundlagen der Computertechnik</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            {[
+                                { id: 'theory', label: '📚 Theorie', icon: '📚' },
+                                { id: 'interactive', label: '🎮 Interaktiv', icon: '🎮' },
+                                { id: 'quiz', label: '❓ Quiz', icon: '❓' }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex-1 px-6 py-4 font-semibold transition ${
+                                        activeTab === tab.id
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="p-8">
+                            {/* Theory Tab */}
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Was ist ein Computer?</h2>
+                                        <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                                            Ein Computer ist eine elektronische Maschine, die Daten verarbeiten kann. 
+                                            Er kann rechnen, Informationen speichern und Programme ausführen.
+                                        </p>
+                                        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                                            <p className="text-blue-900 font-semibold">💡 Wichtig zu wissen:</p>
+                                            <p className="text-blue-800">Computer können nur das tun, was wir ihnen durch Programme sagen!</p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Hardware</h2>
+                                        <p className="text-gray-700 text-lg mb-4">
+                                            Hardware sind alle Teile des Computers, die man anfassen kann:
+                                        </p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {[
+                                                { name: 'Prozessor (CPU)', desc: 'Das "Gehirn" des Computers - führt Berechnungen durch', icon: '🧠' },
+                                                { name: 'Arbeitsspeicher (RAM)', desc: 'Speichert Daten während der Arbeit', icon: '💾' },
+                                                { name: 'Festplatte', desc: 'Speichert Daten dauerhaft', icon: '💿' },
+                                                { name: 'Mainboard', desc: 'Verbindet alle Komponenten', icon: '🔌' }
+                                            ].map(item => (
+                                                <div key={item.name} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <span className="text-2xl">{item.icon}</span>
+                                                        <h3 className="font-bold text-gray-800">{item.name}</h3>
+                                                    </div>
+                                                    <p className="text-gray-600 text-sm">{item.desc}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Software</h2>
+                                        <p className="text-gray-700 text-lg mb-4">
+                                            Software sind Programme und Anwendungen - man kann sie nicht anfassen:
+                                        </p>
+                                        <ul className="space-y-2">
+                                            {[
+                                                'Betriebssystem (z.B. Windows, macOS)',
+                                                'Programme (z.B. Microsoft Word, Chrome)',
+                                                'Apps (z.B. WhatsApp, TikTok)',
+                                                'Spiele (z.B. Minecraft, Fortnite)'
+                                            ].map(item => (
+                                                <li key={item} className="flex items-center gap-2 text-gray-700">
+                                                    <span className="text-green-500">✓</span>
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Peripheriegeräte</h2>
+                                        <p className="text-gray-700 text-lg mb-4">
+                                            Geräte, die an den Computer angeschlossen werden:
+                                        </p>
+                                        <div className="flex flex-wrap gap-3">
+                                            {['Tastatur ⌨️', 'Maus 🖱️', 'Bildschirm 🖥️', 'Drucker 🖨️', 'Lautsprecher 🔊'].map(item => (
+                                                <span key={item} className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-semibold">
+                                                    {item}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {/* Interactive Tab */}
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">🎮 Sortier-Spiel</h2>
+                                    <p className="text-gray-700 mb-6">
+                                        Ziehe die Begriffe in die richtige Kategorie!
+                                    </p>
+
+                                    {/* Available Items */}
+                                    <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                                        <h3 className="font-bold mb-3 text-gray-700">Verfügbare Begriffe:</h3>
+                                        <div className="flex flex-wrap gap-3">
+                                            {availableItems.map(item => (
+                                                <div
+                                                    key={item.id}
+                                                    draggable
+                                                    onDragStart={() => handleDragStart(item)}
+                                                    className="bg-white px-4 py-2 rounded-lg shadow cursor-move hover:shadow-lg transition border-2 border-gray-200"
+                                                >
+                                                    {item.name}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Drop Zones */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        {[
+                                            { id: 'hardware', title: 'Hardware 🖥️', color: 'blue' },
+                                            { id: 'software', title: 'Software 💿', color: 'green' },
+                                            { id: 'peripherie', title: 'Peripherie ⌨️', color: 'purple' }
+                                        ].map(zone => (
+                                            <div
+                                                key={zone.id}
+                                                onDragOver={(e) => e.preventDefault()}
+                                                onDrop={() => handleDrop(zone.id)}
+                                                className={`bg-${zone.color}-50 border-2 border-dashed border-${zone.color}-300 rounded-lg p-4 min-h-[200px]`}
+                                            >
+                                                <h3 className={`font-bold mb-3 text-${zone.color}-700`}>{zone.title}</h3>
+                                                <div className="space-y-2">
+                                                    {categoryItems[zone.id].map(item => (
+                                                        <div key={item.id} className={`bg-${zone.color}-100 px-3 py-2 rounded border border-${zone.color}-300`}>
+                                                            {item.name}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <button
+                                        onClick={resetDragDrop}
+                                        className="mt-4 px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                    >
+                                        Zurücksetzen
+                                    </button>
+
+                                    {availableItems.length === 0 && (
+                                        <div className="bg-green-100 border border-green-300 rounded-lg p-4 text-center">
+                                            <p className="text-green-800 font-bold text-lg">🎉 Sehr gut! Alle Begriffe wurden zugeordnet!</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Quiz Tab */}
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">❓ Quiz</h2>
+                                    
+                                    {!showResults ? (
+                                        <>
+                                            {quizQuestions.map(q => (
+                                                <div key={q.id} className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                                    <h3 className="font-bold text-lg mb-4 text-gray-800">
+                                                        {q.id}. {q.question}
+                                                    </h3>
+                                                    <div className="space-y-2">
+                                                        {q.options.map((option, idx) => (
+                                                            <label
+                                                                key={idx}
+                                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition ${
+                                                                    quizAnswers[q.id] === idx
+                                                                        ? 'bg-blue-100 border-2 border-blue-500'
+                                                                        : 'bg-white border-2 border-gray-200 hover:border-blue-300'
+                                                                }`}
+                                                            >
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`question-${q.id}`}
+                                                                    checked={quizAnswers[q.id] === idx}
+                                                                    onChange={() => handleQuizAnswer(q.id, idx)}
+                                                                    className="w-4 h-4"
+                                                                />
+                                                                <span className="text-gray-700">{option}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            
+                                            <button
+                                                onClick={checkQuiz}
+                                                disabled={Object.keys(quizAnswers).length < quizQuestions.length}
+                                                className="w-full py-3 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                            >
+                                                Quiz auswerten
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <div className="text-center space-y-6">
+                                            <div className={`text-6xl mb-4 ${score >= 3 ? '🎉' : '📚'}`}>
+                                                {score >= 3 ? '🎉' : '📚'}
+                                            </div>
+                                            <h3 className="text-3xl font-bold text-gray-800">
+                                                {score} von {quizQuestions.length} richtig!
+                                            </h3>
+                                            <div className="bg-gray-100 rounded-lg p-6">
+                                                <div className="text-5xl font-bold text-blue-600 mb-2">
+                                                    {Math.round((score / quizQuestions.length) * 100)}%
+                                                </div>
+                                                <p className="text-gray-600">Deine Punktzahl</p>
+                                            </div>
+                                            
+                                            {score >= 3 && (
+                                                <div className="bg-green-100 border border-green-300 rounded-lg p-4">
+                                                    <p className="text-green-800 font-bold">
+                                                        Hervorragend! Du hast die Lektion gemeistert! 🌟
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            <div className="flex gap-3 justify-center">
+                                                <button
+                                                    onClick={resetQuiz}
+                                                    className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                                >
+                                                    Nochmal versuchen
+                                                </button>
+                                                <button
+                                                    onClick={completeLesson}
+                                                    className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                                >
+                                                    Lektion abschließen ✓
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<ComputerLearningApp />, document.getElementById('root'));
+    </script>
+    
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

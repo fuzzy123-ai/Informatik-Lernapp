@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lehrer Dashboard - Informatik Lernapp</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>👨‍🏫 Lehrer Dashboard</h1>
+            <div class="header-info">
+                <button class="btn btn-secondary" onclick="exportData()">📊 Export CSV</button>
+                <button class="btn btn-danger" onclick="logout()">Abmelden</button>
+            </div>
+        </div>
+
+        <!-- Class Selector -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Klasse auswählen</h2>
+            </div>
+            <div class="form-group">
+                <select id="classSelector" onchange="loadClassData()" style="font-size: 1.1rem; padding: 1rem;">
+                    <option value="">-- Klasse wählen --</option>
+                    <optgroup label="Klasse 5">
+                        <option value="5a">5a</option>
+                        <option value="5b">5b</option>
+                        <option value="5c">5c</option>
+                        <option value="5d">5d</option>
+                    </optgroup>
+                    <optgroup label="Klasse 6">
+                        <option value="6a">6a</option>
+                        <option value="6b">6b</option>
+                        <option value="6c">6c</option>
+                        <option value="6d">6d</option>
+                    </optgroup>
+                    <optgroup label="Klasse 7">
+                        <option value="7a">7a</option>
+                        <option value="7b">7b</option>
+                        <option value="7c">7c</option>
+                        <option value="7d">7d</option>
+                    </optgroup>
+                    <optgroup label="Klasse 8">
+                        <option value="8a">8a</option>
+                        <option value="8b">8b</option>
+                        <option value="8c">8c</option>
+                        <option value="8d">8d</option>
+                    </optgroup>
+                    <optgroup label="Klasse 9">
+                        <option value="9a">9a</option>
+                        <option value="9b">9b</option>
+                        <option value="9c">9c</option>
+                        <option value="9d">9d</option>
+                    </optgroup>
+                    <optgroup label="Klasse 10">
+                        <option value="10a">10a</option>
+                        <option value="10b">10b</option>
+                        <option value="10c">10c</option>
+                        <option value="10d">10d</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div id="statsContainer" style="display: none;">
+            <div class="grid grid-3" style="margin-bottom: 2rem;">
+                <div class="card" style="text-align: center;">
+                    <h3 style="color: #667eea; font-size: 2.5rem; margin-bottom: 0.5rem;" id="totalStudents">0</h3>
+                    <p style="color: #718096;">Schüler registriert</p>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <h3 style="color: #48bb78; font-size: 2.5rem; margin-bottom: 0.5rem;" id="avgProgress">0%</h3>
+                    <p style="color: #718096;">Durchschnittlicher Fortschritt</p>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <h3 style="color: #ed8936; font-size: 2.5rem; margin-bottom: 0.5rem;" id="totalLessons">0</h3>
+                    <p style="color: #718096;">Lektionen verfügbar</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Table -->
+        <div id="tableContainer" style="display: none;">
+            <div class="card">
+                <h2 style="margin-bottom: 1rem;">Schüler-Übersicht</h2>
+                <div style="overflow-x: auto;">
+                    <table class="table" id="studentTable">
+                        <thead>
+                            <tr>
+                                <th>Token</th>
+                                <th>Name</th>
+                                <th>Fortschritt</th>
+                                <th>Abgeschlossen</th>
+                                <th>Durchschnitt</th>
+                                <th>Registriert</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" style="display: none;">
+            <div class="card" style="text-align: center; padding: 4rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">📚</div>
+                <h3 style="color: #718096; margin-bottom: 0.5rem;">Noch keine Schüler registriert</h3>
+                <p style="color: #a0aec0;">In dieser Klasse haben sich noch keine Schüler registriert.</p>
+            </div>
+        </div>
+
+        <!-- Lessons Overview -->
+        <div id="lessonsOverview" style="display: none;">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2>📚 Lektionen-Übersicht</h2>
+                    <button onclick="manageClassLessons()" class="btn btn-primary">
+                        🔓 Lektionen verwalten
+                    </button>
+                </div>
+                <div id="lessonsGrid" class="grid grid-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/progress.js"></script>
+    <script>
+        // Auth Check
+        requireAuth('teacher');
+
+        let currentClass = null;
+        
+        // Curriculum direkt eingebunden (wegen CORS bei file://)
+        const curriculum = {
+            "classes": {
+                "5a": { "name": "Klasse 5a", "grade": 5 },
+                "5b": { "name": "Klasse 5b", "grade": 5 },
+                "5c": { "name": "Klasse 5c", "grade": 5 },
+                "5d": { "name": "Klasse 5d", "grade": 5 },
+                "6a": { "name": "Klasse 6a", "grade": 6 },
+                "6b": { "name": "Klasse 6b", "grade": 6 },
+                "6c": { "name": "Klasse 6c", "grade": 6 },
+                "6d": { "name": "Klasse 6d", "grade": 6 },
+                "7a": { "name": "Klasse 7a", "grade": 7 },
+                "7b": { "name": "Klasse 7b", "grade": 7 },
+                "7c": { "name": "Klasse 7c", "grade": 7 },
+                "7d": { "name": "Klasse 7d", "grade": 7 },
+                "8a": { "name": "Klasse 8a", "grade": 8 },
+                "8b": { "name": "Klasse 8b", "grade": 8 },
+                "8c": { "name": "Klasse 8c", "grade": 8 },
+                "8d": { "name": "Klasse 8d", "grade": 8 },
+                "9a": { "name": "Klasse 9a", "grade": 9 },
+                "9b": { "name": "Klasse 9b", "grade": 9 },
+                "9c": { "name": "Klasse 9c", "grade": 9 },
+                "9d": { "name": "Klasse 9d", "grade": 9 },
+                "10a": { "name": "Klasse 10a", "grade": 10 },
+                "10b": { "name": "Klasse 10b", "grade": 10 },
+                "10c": { "name": "Klasse 10c", "grade": 10 },
+                "10d": { "name": "Klasse 10d", "grade": 10 }
+            },
+            "lessons": {
+                "5": [
+                    { "id": "k5-01", "title": "Was ist ein Computer?", "icon": "💻" },
+                    { "id": "k5-02", "title": "Eingabe und Ausgabe", "icon": "⌨️" },
+                    { "id": "k5-03", "title": "Das Binärsystem", "icon": "🔢" },
+                    { "id": "k5-04", "title": "Erste Schritte mit Scratch", "icon": "🐱" },
+                    { "id": "k5-05", "title": "Sequenzen programmieren", "icon": "➡️" },
+                    { "id": "k5-06", "title": "Schleifen verstehen", "icon": "🔄" }
+                ],
+                "6": [
+                    { "id": "k6-01", "title": "Dateien und Ordner", "icon": "📁" },
+                    { "id": "k6-02", "title": "Bedingungen in Scratch", "icon": "❓" },
+                    { "id": "k6-03", "title": "Variablen nutzen", "icon": "📦" },
+                    { "id": "k6-04", "title": "Koordinaten und Bewegung", "icon": "🎯" }
+                ],
+                "7": [
+                    { "id": "k7-01", "title": "Algorithmen verstehen", "icon": "📋" },
+                    { "id": "k7-02", "title": "Python Grundlagen", "icon": "🐍" },
+                    { "id": "k7-03", "title": "Listen und Arrays", "icon": "📊" },
+                    { "id": "k7-04", "title": "Funktionen definieren", "icon": "⚙️" }
+                ],
+                "8": [
+                    { "id": "k8-01", "title": "Sortieralgorithmen", "icon": "🔢" },
+                    { "id": "k8-02", "title": "Suchalgorithmen", "icon": "🔍" },
+                    { "id": "k8-03", "title": "HTML Basics", "icon": "🌐" },
+                    { "id": "k8-04", "title": "CSS Styling", "icon": "🎨" },
+                    { "id": "k8-05", "title": "Datenbanken", "icon": "🗄️" }
+                ],
+                "9": [
+                    { "id": "k9-01", "title": "Objektorientierung", "icon": "🎭" },
+                    { "id": "k9-02", "title": "Dijkstra Algorithmus", "icon": "🗺️" },
+                    { "id": "k9-03", "title": "Rekursion", "icon": "🔁" },
+                    { "id": "k9-04", "title": "JavaScript Basics", "icon": "⚡" },
+                    { "id": "k9-05", "title": "Netzwerke", "icon": "🌐" },
+                    { "id": "k9-06", "title": "Verschlüsselung", "icon": "🔐" }
+                ],
+                "10": [
+                    { "id": "k10-01", "title": "Komplexität", "icon": "📈" },
+                    { "id": "k10-02", "title": "KI Grundlagen", "icon": "🤖" },
+                    { "id": "k10-03", "title": "Git und Versionskontrolle", "icon": "🔀" }
+                ]
+            }
+        };
+
+        // Dropdown mit Schülerzahlen initialisieren
+        function initializeClassDropdown() {
+            const selector = document.getElementById('classSelector');
+            const allUsers = getAllUsers();
+            
+            // Zähle Schüler pro Klasse
+            const classCounts = {};
+            Object.values(allUsers).forEach(user => {
+                if (user.role === 'student') {
+                    classCounts[user.class] = (classCounts[user.class] || 0) + 1;
+                }
+            });
+            
+            // Aktualisiere Options
+            const options = selector.querySelectorAll('option');
+            options.forEach(option => {
+                if (option.value) {
+                    const count = classCounts[option.value] || 0;
+                    option.textContent = `${option.value.toUpperCase()} (${count} Schüler)`;
+                }
+            });
+        }
+        
+        // Beim Laden ausführen
+        window.addEventListener('DOMContentLoaded', initializeClassDropdown);
+
+        function loadClassData() {
+            const className = document.getElementById('classSelector').value;
+            
+            if (!className) {
+                document.getElementById('statsContainer').style.display = 'none';
+                document.getElementById('tableContainer').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('lessonsOverview').style.display = 'none';
+                return;
+            }
+
+            currentClass = className;
+            const students = getClassProgress(className);
+            
+            // Debug-Ausgaben
+            console.log('Ausgewählte Klasse:', className);
+            console.log('Gefundene Schüler:', students);
+            console.log('Alle Nutzer:', getAllUsers());
+
+            if (students.length === 0) {
+                document.getElementById('statsContainer').style.display = 'none';
+                document.getElementById('tableContainer').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('lessonsOverview').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('statsContainer').style.display = 'block';
+            document.getElementById('tableContainer').style.display = 'block';
+            document.getElementById('lessonsOverview').style.display = 'block';
+
+            updateStatistics(students, className);
+            renderTable(students, className);
+            renderLessonsOverview(students, className);
+        }
+
+        function unlockAllForClass() {
+            if (!currentClass) return;
+            
+            if (!confirm(`Möchtest du wirklich ALLE Lektionen für die gesamte Klasse ${currentClass} freischalten?`)) {
+                return;
+            }
+            
+            const grade = curriculum.classes[currentClass].grade;
+            const lessons = curriculum.lessons[grade] || [];
+            const lessonIds = lessons.map(l => l.id);
+            
+            const count = unlockAllLessonsForClass(currentClass, lessonIds);
+            alert(`✓ Alle ${lessons.length} Lektionen wurden für ${count} Schüler in Klasse ${currentClass} freigeschaltet!`);
+            
+            initializeClassDropdown();
+            loadClassData();
+        }
+
+        function manageStudentLessons(token, name) {
+            const user = getUserData(token);
+            const grade = curriculum.classes[user.class].grade;
+            const lessons = curriculum.lessons[grade] || [];
+            
+            let modalHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;" id="lessonModal">
+                    <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2 style="color: #667eea;">Lektionen verwalten: ${name}</h2>
+                            <button onclick="document.getElementById('lessonModal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <button onclick="unlockAllForStudent('${token}')" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">
+                                🔓 Alle freischalten
+                            </button>
+                            <button onclick="lockAllForStudent('${token}')" class="btn btn-danger" style="width: 100%;">
+                                🔒 Alle sperren
+                            </button>
+                        </div>
+                        <hr style="margin: 1.5rem 0;">
+                        <div style="space-y: 0.5rem;">
+            `;
+            
+            lessons.forEach(lesson => {
+                const progress = getProgress(token, lesson.id);
+                const isUnlocked = progress && (progress.status === 'unlocked' || progress.status === 'in-progress' || progress.status === 'completed');
+                const isCompleted = progress && progress.status === 'completed';
+                const isFirstLesson = lesson.id === lessons[0].id;
+                
+                modalHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: ${isCompleted ? '#f0fff4' : '#f7fafc'}; border-radius: 8px; margin-bottom: 0.5rem; border: 2px solid ${isCompleted ? '#48bb78' : '#e2e8f0'};">
+                        <div style="flex: 1;">
+                            <span style="font-size: 1.5rem; margin-right: 0.5rem;">${lesson.icon}</span>
+                            <strong>${lesson.title}</strong>
+                            ${isCompleted ? '<span style="color: #48bb78; margin-left: 0.5rem;">✓</span>' : ''}
+                            ${isFirstLesson ? '<span style="color: #667eea; margin-left: 0.5rem; font-size: 0.8rem;">(Standard freigeschaltet)</span>' : ''}
+                        </div>
+                        <div>
+                            ${!isCompleted ? `
+                                <button 
+                                    onclick="toggleLessonLock('${token}', '${lesson.id}', ${isUnlocked})"
+                                    style="padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; background: ${isUnlocked ? '#f56565' : '#48bb78'}; color: white; font-weight: bold;"
+                                >
+                                    ${isUnlocked ? '🔒 Sperren' : '🔓 Freischalten'}
+                                </button>
+                            ` : '<span style="color: #48bb78; font-weight: bold;">Abgeschlossen</span>'}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            modalHTML += `
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function toggleLessonLock(token, lessonId, isCurrentlyUnlocked) {
+            if (isCurrentlyUnlocked) {
+                lockLesson(token, lessonId);
+            } else {
+                unlockLesson(token, lessonId);
+            }
+            
+            // Modal schließen und neu öffnen
+            const modal = document.getElementById('lessonModal');
+            const user = getUserData(token);
+            modal.remove();
+            manageStudentLessons(token, user.name);
+        }
+
+        function unlockAllForStudent(token) {
+            const user = getUserData(token);
+            const grade = curriculum.classes[user.class].grade;
+            const lessons = curriculum.lessons[grade] || [];
+            
+            lessons.forEach(lesson => {
+                unlockLesson(token, lesson.id);
+            });
+            
+            alert(`✓ Alle ${lessons.length} Lektionen wurden freigeschaltet!`);
+            
+            const modal = document.getElementById('lessonModal');
+            modal.remove();
+            loadClassData();
+        }
+
+        function lockAllForStudent(token) {
+            if (!confirm('Möchtest du wirklich alle Lektionen sperren? (Abgeschlossene bleiben erhalten)')) {
+                return;
+            }
+            
+            const user = getUserData(token);
+            const grade = curriculum.classes[user.class].grade;
+            const lessons = curriculum.lessons[grade] || [];
+            
+            lessons.forEach(lesson => {
+                const progress = getProgress(token, lesson.id);
+                if (!progress || progress.status !== 'completed') {
+                    lockLesson(token, lesson.id);
+                }
+            });
+            
+            alert('✓ Alle nicht-abgeschlossenen Lektionen wurden gesperrt!');
+            
+            const modal = document.getElementById('lessonModal');
+            modal.remove();
+            initializeClassDropdown();
+            loadClassData();
+        }
+
+        function renderLessonsOverview(students, className) {
+            const grade = curriculum.classes[className].grade;
+            const lessons = curriculum.lessons[grade] || [];
+            const grid = document.getElementById('lessonsGrid');
+            grid.innerHTML = '';
+
+            lessons.forEach(lesson => {
+                // Berechne wie viele Schüler die Lektion abgeschlossen haben
+                let completedCount = 0;
+                let unlockedCount = 0;
+                
+                students.forEach(student => {
+                    const progress = student.progress[lesson.id];
+                    if (progress && progress.status === 'completed') {
+                        completedCount++;
+                    } else if (progress && (progress.status === 'unlocked' || progress.status === 'in-progress')) {
+                        unlockedCount++;
+                    }
+                });
+
+                const totalStudents = students.length;
+                const completionPercent = Math.round((completedCount / totalStudents) * 100);
+                const isFirstLesson = lesson.id === lessons[0].id;
+                const isLocked = !isFirstLesson && unlockedCount === 0 && completedCount === 0;
+
+                const card = document.createElement('div');
+                card.className = 'lesson-card';
+                card.style.opacity = isLocked ? '0.6' : '1';
+                card.style.border = isLocked ? '2px solid #e53e3e' : '2px solid #e2e8f0';
+
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <div style="font-size: 2.5rem;">${lesson.icon}</div>
+                        ${isLocked ? '<div style="color: #e53e3e; font-size: 1.5rem;">🔒</div>' : ''}
+                        ${isFirstLesson ? '<div style="color: #667eea; font-size: 0.7rem; font-weight: bold;">AUTO</div>' : ''}
+                    </div>
+                    <h3 style="font-size: 1rem; font-weight: bold; margin-bottom: 0.5rem; color: #2d3748;">${lesson.title}</h3>
+                    <div style="margin: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem; font-size: 0.85rem;">
+                            <span style="color: #718096;">Abgeschlossen:</span>
+                            <span style="font-weight: bold; color: ${completionPercent >= 50 ? '#48bb78' : '#ed8936'};">
+                                ${completedCount}/${totalStudents}
+                            </span>
+                        </div>
+                        <div class="progress-bar" style="height: 12px;">
+                            <div class="progress-fill" style="width: ${completionPercent}%; font-size: 0.7rem;">
+                                ${completionPercent > 0 ? completionPercent + '%' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    ${isLocked ? 
+                        '<div style="background: #fff5f5; border: 1px solid #feb2b2; padding: 0.5rem; border-radius: 6px; font-size: 0.8rem; color: #c53030; text-align: center;">Für Klasse gesperrt</div>' 
+                        : ''}
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function manageClassLessons() {
+            if (!currentClass) return;
+            
+            const grade = curriculum.classes[currentClass].grade;
+            const lessons = curriculum.lessons[grade] || [];
+            const students = getClassProgress(currentClass);
+            
+            let modalHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;" id="lessonModal" onclick="if(event.target.id==='lessonModal') this.remove()">
+                    <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2 style="color: #667eea;">Lektionen verwalten: Klasse ${currentClass.toUpperCase()}</h2>
+                            <button onclick="document.getElementById('lessonModal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+                        </div>
+                        <div style="background: #f7fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <p style="font-size: 0.9rem; color: #4a5568;"><strong>${students.length} Schüler</strong> in dieser Klasse registriert</p>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <button onclick="unlockAllForClass()" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">
+                                🔓 Alle Lektionen für die Klasse freischalten
+                            </button>
+                            <button onclick="lockAllForClass()" class="btn btn-danger" style="width: 100%;">
+                                🔒 Alle Lektionen für die Klasse sperren
+                            </button>
+                        </div>
+                        <hr style="margin: 1.5rem 0;">
+                        <div>
+            `;
+            
+            lessons.forEach(lesson => {
+                // Prüfe Status für alle Schüler
+                let allUnlocked = 0;
+                let someCompleted = 0;
+                
+                students.forEach(student => {
+                    const progress = student.progress[lesson.id];
+                    if (progress && (progress.status === 'unlocked' || progress.status === 'in-progress' || progress.status === 'completed')) {
+                        allUnlocked++;
+                    }
+                    if (progress && progress.status === 'completed') {
+                        someCompleted++;
+                    }
+                });
+                
+                const isUnlockedForAll = allUnlocked === students.length;
+                const isFirstLesson = lesson.id === lessons[0].id;
+                const completionRate = Math.round((someCompleted / students.length) * 100);
+                
+                modalHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: ${someCompleted > 0 ? '#f0fff4' : '#f7fafc'}; border-radius: 8px; margin-bottom: 0.75rem; border: 2px solid ${someCompleted > 0 ? '#48bb78' : '#e2e8f0'};">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="font-size: 1.5rem;">${lesson.icon}</span>
+                                <strong>${lesson.title}</strong>
+                                ${isFirstLesson ? '<span style="color: #667eea; font-size: 0.8rem; background: #edf2f7; padding: 0.2rem 0.5rem; border-radius: 4px;">Standard freigeschaltet</span>' : ''}
+                            </div>
+                            <div style="font-size: 0.85rem; color: #718096;">
+                                ${allUnlocked} von ${students.length} Schülern freigeschaltet • 
+                                ${someCompleted} abgeschlossen (${completionRate}%)
+                            </div>
+                        </div>
+                        <div>
+                            <button 
+                                onclick="toggleClassLessonLock('${lesson.id}', ${isUnlockedForAll})"
+                                style="padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; background: ${isUnlockedForAll ? '#f56565' : '#48bb78'}; color: white; font-weight: bold; white-space: nowrap;"
+                            >
+                                ${isUnlockedForAll ? '🔒 Für alle sperren' : '🔓 Für alle freischalten'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            modalHTML += `
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function toggleClassLessonLock(lessonId, isCurrentlyUnlocked) {
+            if (!currentClass) return;
+            
+            const students = getClassProgress(currentClass);
+            
+            students.forEach(student => {
+                if (isCurrentlyUnlocked) {
+                    lockLesson(student.token, lessonId);
+                } else {
+                    unlockLesson(student.token, lessonId);
+                }
+            });
+            
+            // Modal schließen und neu öffnen
+            document.getElementById('lessonModal').remove();
+            loadClassData();
+            manageClassLessons();
+        }
+
+        function unlockAllForClass() {
+            if (!currentClass) return;
+            
+            if (!confirm(`Möchtest du wirklich ALLE Lektionen für die gesamte Klasse ${currentClass} freischalten?`)) {
+                return;
+            }
+            
+            const grade = curriculum.classes[currentClass].grade;
+            const lessons = curriculum.lessons[grade] || [];
+            const lessonIds = lessons.map(l => l.id);
+            
+            const count = unlockAllLessonsForClass(currentClass, lessonIds);
+            alert(`✓ Alle ${lessons.length} Lektionen wurden für ${count} Schüler in Klasse ${currentClass} freigeschaltet!`);
+            
+            document.getElementById('lessonModal').remove();
+            initializeClassDropdown();
+            loadClassData();
+        }
+
+        function lockAllForClass() {
+            if (!currentClass) return;
+            
+            if (!confirm(`Möchtest du wirklich ALLE nicht-abgeschlossenen Lektionen für die gesamte Klasse ${currentClass} sperren?`)) {
+                return;
+            }
+            
+            const students = getClassProgress(currentClass);
+            const grade = curriculum.classes[currentClass].grade;
+            const lessons = curriculum.lessons[grade] || [];
+            
+            students.forEach(student => {
+                lessons.forEach(lesson => {
+                    const progress = getProgress(student.token, lesson.id);
+                    if (!progress || progress.status !== 'completed') {
+                        lockLesson(student.token, lesson.id);
+                    }
+                });
+            });
+            
+            alert(`✓ Alle nicht-abgeschlossenen Lektionen wurden für Klasse ${currentClass} gesperrt!`);
+            
+            document.getElementById('lessonModal').remove();
+            initializeClassDropdown();
+            loadClassData();
+        }
+
+        function updateStatistics(students, className) {
+            const grade = curriculum.classes[className].grade;
+            const lessons = curriculum.lessons[grade] || [];
+            
+            document.getElementById('totalStudents').textContent = students.length;
+            document.getElementById('totalLessons').textContent = lessons.length;
+
+            // Durchschnitt berechnen
+            const totalProgress = students.reduce((sum, student) => {
+                return sum + calculateOverallProgress(student.token, grade);
+            }, 0);
+            
+            const avgProgress = students.length > 0 ? Math.round(totalProgress / students.length) : 0;
+            document.getElementById('avgProgress').textContent = avgProgress + '%';
+        }
+
+        function renderTable(students, className) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            const grade = curriculum.classes[className].grade;
+            const lessons = curriculum.lessons[grade] || [];
+
+            students.forEach(student => {
+                const completed = Object.values(student.progress)
+                    .filter(p => p.status === 'completed').length;
+                
+                const progressPercent = calculateOverallProgress(student.token, grade);
+                const avgScore = calculateAverageScore(student.progress);
+                
+                const userData = getUserData(student.token);
+                const registeredDate = userData.registeredAt ? 
+                    new Date(userData.registeredAt).toLocaleDateString('de-DE') : '-';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <code 
+                            onclick="copyToken('${student.token}')" 
+                            style="background: #edf2f7; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; transition: all 0.2s;" 
+                            onmouseover="this.style.background='#667eea'; this.style.color='white';"
+                            onmouseout="this.style.background='#edf2f7'; this.style.color='inherit';"
+                            title="Klicken zum Kopieren"
+                        >${student.token}</code>
+                    </td>
+                    <td><strong>${student.name}</strong></td>
+                    <td>
+                        <div class="progress-bar" style="height: 20px;">
+                            <div class="progress-fill" style="width: ${progressPercent}%; font-size: 0.8rem;">${progressPercent}%</div>
+                        </div>
+                    </td>
+                    <td>${completed} / ${lessons.length}</td>
+                    <td>${avgScore}%</td>
+                    <td>${registeredDate}</td>
+                    <td>
+                        <button onclick="manageStudentLessons('${student.token}', '${student.name}')" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            🔓 Verwalten
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function copyToken(token) {
+            navigator.clipboard.writeText(token).then(() => {
+                // Visuelles Feedback
+                const notification = document.createElement('div');
+                notification.innerHTML = `
+                    <div style="position: fixed; top: 20px; right: 20px; background: #48bb78; color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 9999; animation: slideIn 0.3s ease;">
+                        ✓ Token <strong>${token}</strong> kopiert!
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 2000);
+            }).catch(err => {
+                alert('Kopieren fehlgeschlagen: ' + err);
+            });
+        }
+
+        function exportData() {
+            if (!currentClass) {
+                alert('Bitte wähle zuerst eine Klasse aus!');
+                return;
+            }
+
+            const students = exportClassData(currentClass);
+            
+            if (students.length === 0) {
+                alert('Keine Daten zum Exportieren vorhanden.');
+                return;
+            }
+
+            // CSV erstellen
+            const headers = Object.keys(students[0]);
+            const csvContent = [
+                headers.join(','),
+                ...students.map(row => 
+                    headers.map(h => row[h]).join(',')
+                )
+            ].join('\n');
+
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Klasse_${currentClass}_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
