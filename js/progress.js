@@ -192,3 +192,23 @@ function unlockAllLessonsForClass(className, lessonIds) {
     
     return count;
 }
+
+// ============================================
+// Helper functions for legacy lesson templates
+// ============================================
+
+// Get current user token from session
+function getCurrentToken() {
+    const session = getCurrentSession();
+    return session ? session.token : null;
+}
+
+// Alias for completeLesson (used by older lessons)
+function markLessonCompleted(token, lessonId, score = 100) {
+    return completeLesson(token, lessonId, score);
+}
+
+// Alias for startLesson (used by older lessons)
+function markLessonInProgress(token, lessonId) {
+    return startLesson(token, lessonId);
+}
