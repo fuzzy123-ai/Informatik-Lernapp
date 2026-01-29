@@ -113,19 +113,19 @@ p {
                         <div className="flex border-b">
                             <button 
                                 onClick={() => setActiveTab('theory')}
-                                className={\`flex-1 px-6 py-3 font-semibold transition \${activeTab === 'theory' ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}\`}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
                                 📚 Theorie
                             </button>
                             <button 
                                 onClick={() => setActiveTab('interactive')}
-                                className={\`flex-1 px-6 py-3 font-semibold transition \${activeTab === 'interactive' ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}\`}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
                                 ⚡ Interaktiv
                             </button>
                             <button 
                                 onClick={() => setActiveTab('quiz')}
-                                className={\`flex-1 px-6 py-3 font-semibold transition \${activeTab === 'quiz' ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}\`}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
                                 ✅ Quiz
                             </button>
@@ -274,9 +274,9 @@ p {
                                                 <div 
                                                     style={{
                                                         backgroundColor: boxColor,
-                                                        width: \`\${boxSize}px\`,
-                                                        height: \`\${boxSize}px\`,
-                                                        border: \`\${boxBorder}px solid black\`,
+                                                        width: `${boxSize}px`,
+                                                        height: `${boxSize}px`,
+                                                        border: `${boxBorder}px solid black`,
                                                         borderRadius: '10px',
                                                         transition: 'all 0.3s'
                                                     }}
@@ -284,13 +284,13 @@ p {
                                             </div>
                                             
                                             <div className="mt-4 bg-gray-800 text-green-400 rounded-lg p-3 font-mono text-sm">
-                                                <pre>{\`.box {
-  background-color: \${boxColor};
-  width: \${boxSize}px;
-  height: \${boxSize}px;
-  border: \${boxBorder}px solid black;
+                                                <pre>{`.box {
+  background-color: ${boxColor};
+  width: ${boxSize}px;
+  height: ${boxSize}px;
+  border: ${boxBorder}px solid black;
   border-radius: 10px;
-}\`}</pre>
+}`}</pre>
                                             </div>
                                         </div>
                                     </section>
@@ -359,7 +359,7 @@ p {
                                                     <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
                                                         <input
                                                             type="radio"
-                                                            name={\`question-\${q.id}\`}
+                                                            name={`question-${q.id}`}
                                                             checked={quizAnswers[q.id] === optIndex}
                                                             onChange={() => handleQuizAnswer(q.id, optIndex)}
                                                             className="w-4 h-4"

@@ -75,7 +75,7 @@
                 if (token && lessonId && typeof window.completeLesson === 'function') {
                     const finalScore = Math.round((score / quizQuestions.length) * 100);
                     window.completeLesson(token, lessonId, finalScore);
-                    alert(\`Lektion abgeschlossen! Deine Punktzahl: \${finalScore}%\`);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
                 }
                 window.location.href = '../../student-dashboard.html';
             };
@@ -88,10 +88,10 @@
                     const times = [23, 24, 22, 25];
                     let result = 'Pinging ' + ipAddress + '...\n\n';
                     times.forEach((time, i) => {
-                        result += \`Reply from \${ipAddress}: bytes=32 time=\${time}ms TTL=64\n\`;
+                        result += `Reply from ${ipAddress}: bytes=32 time=${time}ms TTL=64\n`;
                     });
-                    result += \`\nPing statistics:\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)\n\`;
-                    result += \`Average = \${(times.reduce((a,b)=>a+b)/times.length).toFixed(0)}ms\`;
+                    result += `\nPing statistics:\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)\n`;
+                    result += `Average = ${(times.reduce((a,b)=>a+b)/times.length).toFixed(0)}ms`;
                     setPingResult(result);
                     setIsPinging(false);
                 }, 2000);
@@ -105,7 +105,7 @@
                     'wikipedia.org': '208.80.154.224'
                 };
                 const ip = dnsMap[dnsQuery.toLowerCase()] || '93.184.216.34';
-                setDnsResult(\`DNS Lookup für "\${dnsQuery}":\n\nIP-Adresse: \${ip}\nTyp: A (IPv4)\nTTL: 300 seconds\`);
+                setDnsResult(`DNS Lookup für "${dnsQuery}":\n\nIP-Adresse: ${ip}\nTyp: A (IPv4)\nTTL: 300 seconds`);
             };
 
             return (
@@ -132,19 +132,19 @@
                         <div className="flex border-b">
                             <button 
                                 onClick={() => setActiveTab('theory')}
-                                className={\`flex-1 px-6 py-3 font-semibold transition \${activeTab === 'theory' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}\`}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
                                 📚 Theorie
                             </button>
                             <button 
                                 onClick={() => setActiveTab('interactive')}
-                                className={\`flex-1 px-6 py-3 font-semibold transition \${activeTab === 'interactive' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}\`}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
                                 ⚡ Interaktiv
                             </button>
                             <button 
                                 onClick={() => setActiveTab('quiz')}
-                                className={\`flex-1 px-6 py-3 font-semibold transition \${activeTab === 'quiz' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}\`}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
                                 ✅ Quiz
                             </button>
@@ -383,7 +383,7 @@
                                                     <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
                                                         <input
                                                             type="radio"
-                                                            name={\`question-\${q.id}\`}
+                                                            name={`question-${q.id}`}
                                                             checked={quizAnswers[q.id] === optIndex}
                                                             onChange={() => handleQuizAnswer(q.id, optIndex)}
                                                             className="w-4 h-4"
