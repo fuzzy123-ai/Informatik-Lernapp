@@ -522,7 +522,7 @@
                     }
                 });
                 
-                const isUnlockedForAll = allUnlocked === students.length;
+                const isUnlockedForAll = students.length > 0 && allUnlocked === students.length;
                 const isFirstLesson = lesson.id === lessons[0].id;
                 const completionRate = students.length > 0 ? Math.round((someCompleted / students.length) * 100) : 0;
                 
