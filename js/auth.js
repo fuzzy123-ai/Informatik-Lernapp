@@ -3,6 +3,103 @@
 const AUTH_KEY = 'informatik_lernapp_users';
 const SESSION_KEY = 'informatik_lernapp_session';
 
+// Check if localStorage is available and working
+function isLocalStorageAvailable() {
+    const testKey = '__storage_test__';
+    try {
+        localStorage.setItem(testKey, testKey);
+        const result = localStorage.getItem(testKey);
+        localStorage.removeItem(testKey);
+        return result === testKey;
+    } catch (e) {
+        return false;
+    }
+}
+
+// Check if running in file:// protocol (problematic in Firefox)
+function isFileProtocol() {
+    return window.location.protocol === 'file:';
+}
+
+// Show warning if storage is not available
+function checkStorageAvailability() {
+    if (!isLocalStorageAvailable()) {
+        const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+        const isFile = isFileProtocol();
+        
+        let message = '⚠️ Speicherproblem erkannt!\n\n';
+        
+        if (isFirefox && isFile) {
+            message += 'Firefox blockiert die Datenspeicherung für lokale Dateien (file://).\n\n';
+            message += 'Lösungen:\n';
+            message += '1. Öffne die App über einen lokalen Webserver\n';
+            message += '2. Oder verwende einen anderen Browser (Chrome, Edge)\n';
+            message += '3. Oder öffne die App online über GitHub Pages';
+        } else if (isFile) {
+            message += 'Die App wird lokal geöffnet und kann keine Daten speichern.\n\n';
+            message += 'Bitte öffne die App über einen Webserver oder online.';
+        } else {
+            message += 'Der Browser kann keine Daten speichern.\n';
+            message += 'Bitte prüfe deine Browser-Einstellungen oder deaktiviere den Privaten Modus.';
+        }
+        
+        // Show warning banner
+        showStorageWarning(message);
+        return false;
+    }
+    return true;
+}
+
+// Display a warning banner at the top of the page
+function showStorageWarning(message) {
+    // Check if warning already exists
+    if (document.getElementById('storage-warning-banner')) return;
+    
+    const banner = document.createElement('div');
+    banner.id = 'storage-warning-banner';
+    banner.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #f56565;
+        color: white;
+        padding: 1rem;
+        text-align: center;
+        z-index: 10000;
+        font-weight: bold;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    `;
+    
+    const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+    const isFile = isFileProtocol();
+    
+    if (isFirefox && isFile) {
+        banner.innerHTML = `
+            ⚠️ <strong>Firefox-Hinweis:</strong> Die App funktioniert nicht mit lokalen Dateien (file://).
+            <br>Bitte öffne die App über einen <strong>lokalen Webserver</strong> oder verwende <strong>Chrome/Edge</strong>.
+            <button onclick="this.parentElement.remove()" style="margin-left: 1rem; padding: 0.25rem 0.5rem; cursor: pointer;">✕ Schließen</button>
+        `;
+    } else {
+        banner.innerHTML = `
+            ⚠️ <strong>Speicherproblem:</strong> Daten können nicht gespeichert werden. Registrierung/Login funktioniert nicht.
+            <button onclick="this.parentElement.remove()" style="margin-left: 1rem; padding: 0.25rem 0.5rem; cursor: pointer;">✕ Schließen</button>
+        `;
+    }
+    
+    document.body.insertBefore(banner, document.body.firstChild);
+}
+
+// Run storage check when auth.js loads
+if (typeof window !== 'undefined') {
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkStorageAvailability);
+    } else {
+        checkStorageAvailability();
+    }
+}
+
 // Token generieren (6 Zeichen: A-Z, 0-9)
 function generateToken() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
