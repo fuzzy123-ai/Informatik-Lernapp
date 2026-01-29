@@ -145,10 +145,13 @@
     <script src="js/auth.js"></script>
     <script src="js/progress.js"></script>
     <script>
-        // Auth Check
-        requireAuth('teacher');
+        (function() {
+            // Auth Check - stop execution if not authenticated
+            if (!requireAuth('teacher')) {
+                return;
+            }
 
-        let currentClass = null;
+            let currentClass = null;
         
         // Curriculum direkt eingebunden (wegen CORS bei file://)
         const curriculum = {
@@ -756,6 +759,7 @@
             link.download = `Klasse_${currentClass}_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
         }
+        })();
     </script>
 </body>
 </html>
