@@ -271,7 +271,8 @@
                 document.getElementById('statsContainer').style.display = 'none';
                 document.getElementById('tableContainer').style.display = 'none';
                 document.getElementById('emptyState').style.display = 'block';
-                document.getElementById('lessonsOverview').style.display = 'none';
+                document.getElementById('lessonsOverview').style.display = 'block';
+                renderLessonsOverview(students, className);
                 return;
             }
 
@@ -439,7 +440,7 @@
                 });
 
                 const totalStudents = students.length;
-                const completionPercent = Math.round((completedCount / totalStudents) * 100);
+                const completionPercent = totalStudents > 0 ? Math.round((completedCount / totalStudents) * 100) : 0;
                 const isFirstLesson = lesson.id === lessons[0].id;
                 const isLocked = !isFirstLesson && unlockedCount === 0 && completedCount === 0;
 
@@ -523,7 +524,7 @@
                 
                 const isUnlockedForAll = allUnlocked === students.length;
                 const isFirstLesson = lesson.id === lessons[0].id;
-                const completionRate = Math.round((someCompleted / students.length) * 100);
+                const completionRate = students.length > 0 ? Math.round((someCompleted / students.length) * 100) : 0;
                 
                 modalHTML += `
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: ${someCompleted > 0 ? '#f0fff4' : '#f7fafc'}; border-radius: 8px; margin-bottom: 0.75rem; border: 2px solid ${someCompleted > 0 ? '#48bb78' : '#e2e8f0'};">
