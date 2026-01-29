@@ -27,31 +27,15 @@ function checkStorageAvailability() {
         const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
         const isFile = isFileProtocol();
         
-        let message = '⚠️ Speicherproblem erkannt!\n\n';
-        
-        if (isFirefox && isFile) {
-            message += 'Firefox blockiert die Datenspeicherung für lokale Dateien (file://).\n\n';
-            message += 'Lösungen:\n';
-            message += '1. Öffne die App über einen lokalen Webserver\n';
-            message += '2. Oder verwende einen anderen Browser (Chrome, Edge)\n';
-            message += '3. Oder öffne die App online über GitHub Pages';
-        } else if (isFile) {
-            message += 'Die App wird lokal geöffnet und kann keine Daten speichern.\n\n';
-            message += 'Bitte öffne die App über einen Webserver oder online.';
-        } else {
-            message += 'Der Browser kann keine Daten speichern.\n';
-            message += 'Bitte prüfe deine Browser-Einstellungen oder deaktiviere den Privaten Modus.';
-        }
-        
-        // Show warning banner
-        showStorageWarning(message);
+        // Show warning banner with context
+        showStorageWarning(isFirefox, isFile);
         return false;
     }
     return true;
 }
 
 // Display a warning banner at the top of the page
-function showStorageWarning(message) {
+function showStorageWarning(isFirefox, isFile) {
     // Check if warning already exists
     if (document.getElementById('storage-warning-banner')) return;
     
@@ -71,21 +55,28 @@ function showStorageWarning(message) {
         box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     `;
     
-    const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
-    const isFile = isFileProtocol();
-    
+    // Create message text element
+    const messageSpan = document.createElement('span');
     if (isFirefox && isFile) {
-        banner.innerHTML = `
+        messageSpan.innerHTML = `
             ⚠️ <strong>Firefox-Hinweis:</strong> Die App funktioniert nicht mit lokalen Dateien (file://).
             <br>Bitte öffne die App über einen <strong>lokalen Webserver</strong> oder verwende <strong>Chrome/Edge</strong>.
-            <button onclick="this.parentElement.remove()" style="margin-left: 1rem; padding: 0.25rem 0.5rem; cursor: pointer;">✕ Schließen</button>
         `;
     } else {
-        banner.innerHTML = `
+        messageSpan.innerHTML = `
             ⚠️ <strong>Speicherproblem:</strong> Daten können nicht gespeichert werden. Registrierung/Login funktioniert nicht.
-            <button onclick="this.parentElement.remove()" style="margin-left: 1rem; padding: 0.25rem 0.5rem; cursor: pointer;">✕ Schließen</button>
         `;
     }
+    banner.appendChild(messageSpan);
+    
+    // Create close button with proper event listener
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '✕ Schließen';
+    closeButton.style.cssText = 'margin-left: 1rem; padding: 0.25rem 0.5rem; cursor: pointer;';
+    closeButton.addEventListener('click', function() {
+        banner.remove();
+    });
+    banner.appendChild(closeButton);
     
     document.body.insertBefore(banner, document.body.firstChild);
 }
