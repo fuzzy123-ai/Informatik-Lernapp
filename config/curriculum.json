@@ -39,32 +39,6 @@
       { "id": "k6-02", "title": "Bedingungen in Scratch", "icon": "❓", "description": "Wenn-Dann-Strukturen", "path": "lessons/klasse6/bedingungen.html", "terms": ["Bedingung", "IF-ELSE", "Verzweigung"] },
       { "id": "k6-03", "title": "Variablen nutzen", "icon": "📦", "description": "Werte speichern und nutzen", "path": "lessons/klasse6/variablen.html", "terms": ["Variable", "Speicher", "Wert"] },
       { "id": "k6-04", "title": "Koordinaten und Bewegung", "icon": "🎯", "description": "X-Y-Koordinatensystem", "path": "lessons/klasse6/koordinaten.html", "terms": ["Koordinate", "Position", "X-Y"] }
-    ],
-    "7": [
-      { "id": "k7-01", "title": "Algorithmen verstehen", "icon": "📋", "description": "Was sind Algorithmen?", "path": "lessons/klasse7/algorithmen.html", "terms": ["Algorithmus", "Ablauf", "Prozess"] },
-      { "id": "k7-02", "title": "Python Grundlagen", "icon": "🐍", "description": "Erste Schritte in Python", "path": "lessons/klasse7/python_basics.html", "terms": ["Python", "print", "input"] },
-      { "id": "k7-03", "title": "Listen und Arrays", "icon": "📊", "description": "Datensammlungen verwalten", "path": "lessons/klasse7/listen.html", "terms": ["Liste", "Array", "Index"] },
-      { "id": "k7-04", "title": "Funktionen definieren", "icon": "⚙️", "description": "Code wiederverwenden", "path": "lessons/klasse7/funktionen.html", "terms": ["Funktion", "Parameter", "Return"] }
-    ],
-    "8": [
-      { "id": "k8-01", "title": "Sortieralgorithmen", "icon": "🔢", "description": "Bubble Sort verstehen", "path": "lessons/klasse8/bubble_sort.html", "terms": ["Sortieren", "Bubble Sort", "Vergleichen"] },
-      { "id": "k8-02", "title": "Suchalgorithmen", "icon": "🔍", "description": "Lineare und binäre Suche", "path": "lessons/klasse8/suchalgorithmen.html", "terms": ["Suche", "Binär", "Linear"] },
-      { "id": "k8-03", "title": "HTML Basics", "icon": "🌐", "description": "Webseiten strukturieren", "path": "lessons/klasse8/html_basics.html", "terms": ["HTML", "Tag", "Element"] },
-      { "id": "k8-04", "title": "CSS Styling", "icon": "🎨", "description": "Webseiten gestalten", "path": "lessons/klasse8/css_basics.html", "terms": ["CSS", "Style", "Selector"] },
-      { "id": "k8-05", "title": "Datenbanken", "icon": "🗄️", "description": "Daten strukturiert speichern", "path": "lessons/klasse8/datenbanken.html", "terms": ["Datenbank", "Tabelle", "SQL"] }
-    ],
-    "9": [
-      { "id": "k9-01", "title": "Objektorientierung", "icon": "🎭", "description": "Klassen und Objekte", "path": "lessons/klasse9/oop.html", "terms": ["OOP", "Klasse", "Objekt"] },
-      { "id": "k9-02", "title": "Dijkstra Algorithmus", "icon": "🗺️", "description": "Kürzeste Wege finden", "path": "lessons/klasse9/dijkstra.html", "terms": ["Dijkstra", "Graph", "Pfad"] },
-      { "id": "k9-03", "title": "Rekursion", "icon": "🔁", "description": "Funktionen rufen sich selbst auf", "path": "lessons/klasse9/rekursion.html", "terms": ["Rekursion", "Selbstaufruf", "Basis"] },
-      { "id": "k9-04", "title": "JavaScript Basics", "icon": "⚡", "description": "Dynamische Webseiten", "path": "lessons/klasse9/javascript.html", "terms": ["JavaScript", "Event", "DOM"] },
-      { "id": "k9-05", "title": "Netzwerke", "icon": "🌐", "description": "Internet und Protokolle", "path": "lessons/klasse9/netzwerke.html", "terms": ["Netzwerk", "IP", "Protokoll"] },
-      { "id": "k9-06", "title": "Verschlüsselung", "icon": "🔐", "description": "Daten sicher übertragen", "path": "lessons/klasse9/verschluesselung.html", "terms": ["Verschlüsselung", "Hash", "RSA"] }
-    ],
-    "10": [
-      { "id": "k10-01", "title": "Komplexität", "icon": "📈", "description": "Big-O Notation verstehen", "path": "lessons/klasse10/komplexitaet.html", "terms": ["Komplexität", "Big-O", "Laufzeit"] },
-      { "id": "k10-02", "title": "KI Grundlagen", "icon": "🤖", "description": "Maschinelles Lernen", "path": "lessons/klasse10/ki_grundlagen.html", "terms": ["KI", "ML", "Neuronales Netz"] },
-      { "id": "k10-03", "title": "Git und Versionskontrolle", "icon": "🔀", "description": "Teamarbeit organisieren", "path": "lessons/klasse10/git.html", "terms": ["Git", "Commit", "Branch"] }
     ]
   },
   "teacherPassword": "P3stal0zzi"

@@ -9,7 +9,7 @@ Eine modulare, browserbasierte Lernplattform für Informatik-Unterricht der Klas
 ## ✨ Features
 
 ### 🎓 Für Schüler
-- **35+ interaktive Lektionen** für die Klassenstufen 5-10
+- **10 interaktive Lektionen** für die Klassenstufen 5-6 (weitere in Planung)
 - **Progressives Freischalten**: Lektionen werden nacheinander freigeschaltet nach Abschluss der vorherigen
 - **Interaktive Übungen**: Drag & Drop, Simulationen, Live-Editoren
 - **Sofortiges Feedback**: Quizzes mit direkter Auswertung
@@ -23,6 +23,7 @@ Eine modulare, browserbasierte Lernplattform für Informatik-Unterricht der Klas
   - Einzelne Lektionen für Schüler freischalten/sperren
   - Klassenweite Steuerung aller Lektionen
   - Visuelle Übersicht über Lektionsfortschritt
+  - **Klickbare Lektionskacheln**: Lehrkräfte können Lektionen durch Klick öffnen und Inhalte ansehen
 - **Token-Verwaltung**: Einfaches Kopieren von Schüler-Tokens
 - **CSV-Export**: Daten für externe Auswertungen exportieren
 - **Keine Installation nötig**: Läuft direkt im Browser via `file://` Protokoll
@@ -59,43 +60,22 @@ cd Informatik-Lernapp
 
 ## 📖 Lektions-Übersicht
 
-### Klasse 5
-- 🖥️ Was ist ein Computer?
-- 💾 Das Binärsystem
+### Klasse 5 (6 Lektionen)
+- 💻 Was ist ein Computer?
+- ⌨️ Eingabe und Ausgabe
+- 🔢 Das Binärsystem
+- 🐱 Erste Schritte mit Scratch
+- ➡️ Sequenzen programmieren
+- 🔄 Schleifen verstehen
+
+### Klasse 6 (4 Lektionen)
 - 📁 Dateien und Ordner
-- 🧮 Variablen
+- ❓ Bedingungen in Scratch
+- 📦 Variablen nutzen
+- 🎯 Koordinaten und Bewegung
 
-### Klasse 6
-- 🔄 Schleifen
-- ❓ Bedingungen
-- 🎮 Erste Programme
-- 🔢 Arrays
-
-### Klasse 7
-- 🧩 Algorithmen
-- 🐍 Python Basics
-- 🔍 Suchen und Finden
-- ⚙️ Funktionen
-
-### Klasse 8
-- 🔢 Sortieralgorithmen (Bubble Sort)
-- 🔍 Suchalgorithmen
-- 🌐 HTML Basics
-- 🎨 CSS Styling
-- 🗄️ Datenbanken
-
-### Klasse 9
-- 🎭 Objektorientierung
-- 🗺️ Dijkstra Algorithmus
-- 🔁 Rekursion
-- ⚡ JavaScript Basics
-- 🌐 Netzwerke
-- 🔐 Verschlüsselung
-
-### Klasse 10
-- 📈 Komplexität (Big O)
-- 🤖 KI Grundlagen
-- 🔀 Git und Versionskontrolle
+### Klasse 7-10
+- 🚧 Weitere Lektionen in Planung
 
 ## 🏗️ Projektstruktur
 
@@ -119,19 +99,16 @@ informatik_lernapp/
 └── lessons/
     ├── klasse5/
     │   ├── was_ist_ein_computer.html
+    │   ├── eingabe_ausgabe.html
     │   ├── binaersystem.html
-    │   └── dateien_ordner.html
-    │   └── variablen.html
-    ├── klasse6/
-    │   └── ...
-    ├── klasse7/
-    │   └── ...
-    ├── klasse8/
-    │   └── ...
-    ├── klasse9/
-    │   └── ...
-    └── klasse10/
-        └── ...
+    │   ├── scratch_intro.html
+    │   ├── sequenzen.html
+    │   └── schleifen.html
+    └── klasse6/
+        ├── dateien_ordner.html
+        ├── bedingungen.html
+        ├── variablen.html
+        └── koordinaten.html
 ```
 
 ## 🔧 Technische Details
@@ -180,21 +157,19 @@ Alle Daten werden im Browser gespeichert (`LocalStorage`):
 
 Aktuell vollständig implementiert:
 
-### 1. Was ist ein Computer? (Klasse 5)
-- Hardware/Software-Theorie
-- Drag & Drop Kategorisierung
-- 4-Fragen Quiz
+### Klasse 5 (6 Lektionen)
+1. **Was ist ein Computer?** - Hardware/Software-Theorie, Drag & Drop Kategorisierung, 4-Fragen Quiz
+2. **Eingabe und Ausgabe** - Eingabe- und Ausgabegeräte verstehen
+3. **Das Binärsystem** - Bit-Erklärung mit Animation, interaktiver Bit-Simulator, Dezimal ↔ Binär Konverter
+4. **Erste Schritte mit Scratch** - Einführung in visuelle Programmierung
+5. **Sequenzen programmieren** - Befehle in der richtigen Reihenfolge
+6. **Schleifen verstehen** - Wiederholungen in Programmen
 
-### 2. Das Binärsystem (Klasse 5)
-- Bit-Erklärung mit Animation
-- Interaktiver Bit-Simulator
-- Dezimal ↔ Binär Konverter
-- 4-Fragen Quiz
-
-### 3. Dateien und Ordner (Klasse 6)
-- Dateisystem-Theorie
-- Interaktiver Ordner-Explorer
-- 4-Fragen Quiz
+### Klasse 6 (4 Lektionen)
+1. **Dateien und Ordner** - Dateisystem-Theorie, interaktiver Ordner-Explorer, 4-Fragen Quiz
+2. **Bedingungen in Scratch** - IF-THEN-ELSE Strukturen mit interaktiven Beispielen
+3. **Variablen nutzen** - Werte speichern und ändern mit praktischen Demos
+4. **Koordinaten und Bewegung** - X-Y-Koordinatensystem mit bewegbarem Sprite
 
 ## 👥 Lehrer-Dashboard Features
 
