@@ -759,6 +759,19 @@
             link.download = `Klasse_${currentClass}_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
         }
+
+        // Make functions globally available for HTML onclick/onchange handlers
+        window.loadClassData = loadClassData;
+        window.exportData = exportData;
+        window.copyToken = copyToken;
+        window.manageStudentLessons = manageStudentLessons;
+        window.toggleLessonLock = toggleLessonLock;
+        window.unlockAllForStudent = unlockAllForStudent;
+        window.lockAllForStudent = lockAllForStudent;
+        window.unlockAllForClass = unlockAllForClass;
+        window.manageClassLessons = manageClassLessons;
+        window.toggleClassLessonLock = toggleClassLessonLock;
+        window.lockAllForClass = lockAllForClass;
         })();
     </script>
 </body>
