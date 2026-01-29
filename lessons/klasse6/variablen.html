@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variablen nutzen - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-green-500 to-teal-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function VariablenApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            
+            // Interactive examples state
+            const [counter, setCounter] = useState(0);
+            const [playerName, setPlayerName] = useState('');
+            const [displayName, setDisplayName] = useState('Spieler');
+            const [gameScore, setGameScore] = useState(0);
+            const [lives, setLives] = useState(3);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was ist eine Variable?",
+                    options: ["Ein fester Wert", "Ein Speicherplatz für veränderbare Werte", "Eine Funktion", "Ein Befehl zum Löschen"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Wie ändert man den Wert einer Variable 'Punkte' in Scratch?",
+                    options: ["Lösche Punkte", "Setze Punkte auf [neuer Wert]", "Erstelle Punkte", "Verstecke Punkte"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Was passiert bei 'Ändere Score um 10'?",
+                    options: ["Score wird gelöscht", "Score wird auf 10 gesetzt", "10 wird zu Score addiert", "Score wird mit 10 multipliziert"],
+                    correct: 2
+                },
+                {
+                    id: 4,
+                    question: "Welche Namen sind gute Variable-Namen?",
+                    options: ["x, y, z", "spielerName, punkte, leben", "123, abc", "Variable1, Variable2"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const submitQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) {
+                        correctCount++;
+                    }
+                });
+                const percentage = Math.round((correctCount / quizQuestions.length) * 100);
+                setScore(percentage);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const token = new URLSearchParams(window.location.search).get('token');
+                if (!token) {
+                    alert('⚠️ Kein Token gefunden! Bitte über das Dashboard anmelden.');
+                    return;
+                }
+
+                const lessonId = 'k6-03';
+                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                const user = users[token];
+                
+                if (!user) {
+                    alert('⚠️ Benutzer nicht gefunden!');
+                    return;
+                }
+
+                if (!user.progress) user.progress = {};
+                user.progress[lessonId] = {
+                    status: 'completed',
+                    score: score,
+                    timestamp: new Date().toISOString()
+                };
+
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('🎉 Lektion abgeschlossen! Score: ' + score + '%');
+                window.location.href = '../../student-dashboard.html?token=' + token;
+            };
+
+            const handleNameSubmit = () => {
+                if (playerName.trim()) {
+                    setDisplayName(playerName);
+                }
+            };
+
+            const collectCoin = () => {
+                setGameScore(gameScore + 10);
+            };
+
+            const loseLife = () => {
+                if (lives > 0) setLives(lives - 1);
+            };
+
+            return (
+                <div className="min-h-screen p-8">
+                    <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white p-8">
+                            <button 
+                                onClick={() => {
+                                    const token = new URLSearchParams(window.location.search).get('token');
+                                    window.location.href = '../../student-dashboard.html?token=' + token;
+                                }} 
+                                className="mb-4 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition"
+                            >
+                                ← Zurück zum Dashboard
+                            </button>
+                            <h1 className="text-4xl font-bold mb-2">📦 Variablen nutzen</h1>
+                            <p className="text-xl opacity-90">Werte speichern und verändern</p>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className="flex border-b">
+                            {['theory', 'interactive', 'quiz'].map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`flex-1 py-4 text-lg font-semibold transition ${
+                                        activeTab === tab
+                                            ? 'bg-green-100 text-green-800 border-b-4 border-green-600'
+                                            : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    {tab === 'theory' && '📖 Theorie'}
+                                    {tab === 'interactive' && '🎮 Interaktiv'}
+                                    {tab === 'quiz' && '✅ Quiz'}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-8">
+                            {/* Theory Tab */}
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <h2 className="text-3xl font-bold mb-4 text-gray-800">Was sind Variablen?</h2>
+                                        <p className="text-lg text-gray-700 leading-relaxed">
+                                            Eine Variable ist wie eine Box mit einem Namen-Schild. In dieser Box kannst du Werte speichern 
+                                            und später wieder abrufen oder verändern. Variablen helfen dir, wichtige Informationen in deinem Programm zu merken!
+                                        </p>
+                                    </div>
+
+                                    <div className="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-xl border-l-4 border-green-500">
+                                        <h3 className="text-xl font-bold mb-3 text-green-800">💡 Alltags-Beispiel</h3>
+                                        <p className="text-gray-700 text-lg">
+                                            Stell dir vor, du spielst ein Spiel. Die Variable <strong>"Punkte"</strong> speichert deine Punktzahl, 
+                                            die Variable <strong>"Leben"</strong> speichert deine verbleibenden Leben, und die Variable 
+                                            <strong>"Name"</strong> speichert deinen Spielernamen.
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-2xl font-bold mb-3 text-gray-800">Variablen in Scratch</h3>
+                                        <div className="space-y-4">
+                                            <div className="bg-orange-100 p-6 rounded-xl">
+                                                <h4 className="font-bold text-lg mb-2">1️⃣ Variable erstellen</h4>
+                                                <p className="text-gray-700">Gehe zu "Variablen" → "Neue Variable" → Gib einen Namen ein</p>
+                                                <div className="bg-orange-300 text-black p-3 rounded-lg mt-2 font-mono">
+                                                    Erstelle Variable: "Punkte"
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-blue-100 p-6 rounded-xl">
+                                                <h4 className="font-bold text-lg mb-2">2️⃣ Wert setzen</h4>
+                                                <p className="text-gray-700">Setze die Variable auf einen bestimmten Wert</p>
+                                                <div className="bg-blue-400 text-white p-3 rounded-lg mt-2 font-mono">
+                                                    Setze [Punkte] auf [0]
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-green-100 p-6 rounded-xl">
+                                                <h4 className="font-bold text-lg mb-2">3️⃣ Wert ändern</h4>
+                                                <p className="text-gray-700">Erhöhe oder verringere den Wert</p>
+                                                <div className="bg-green-500 text-white p-3 rounded-lg mt-2 font-mono">
+                                                    Ändere [Punkte] um [10]
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-purple-100 p-6 rounded-xl">
+                                                <h4 className="font-bold text-lg mb-2">4️⃣ Wert anzeigen</h4>
+                                                <p className="text-gray-700">Zeige den aktuellen Wert auf der Bühne</p>
+                                                <div className="bg-purple-500 text-white p-3 rounded-lg mt-2 font-mono">
+                                                    sage (Punkte) für 2 Sekunden
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-2xl font-bold mb-3 text-gray-800">📝 Gute Variable-Namen</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="bg-green-100 p-4 rounded-lg border-2 border-green-500">
+                                                <div className="text-2xl mb-2">✅</div>
+                                                <p className="font-semibold text-green-800">Gut:</p>
+                                                <p className="text-sm">spielerName, punkte, leben, geschwindigkeit</p>
+                                            </div>
+                                            <div className="bg-red-100 p-4 rounded-lg border-2 border-red-500">
+                                                <div className="text-2xl mb-2">❌</div>
+                                                <p className="font-semibold text-red-800">Schlecht:</p>
+                                                <p className="text-sm">x, abc, var1, temp</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Interactive Tab */}
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-8">
+                                    <h2 className="text-3xl font-bold text-gray-800">Probiere Variablen aus!</h2>
+                                    
+                                    {/* Counter Example */}
+                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl">
+                                        <h3 className="text-2xl font-bold mb-4 text-gray-800">🔢 Zähler-Variable</h3>
+                                        <p className="text-gray-600 mb-4">
+                                            Klicke die Buttons und beobachte, wie sich die Variable "counter" ändert!
+                                        </p>
+                                        <div className="space-y-4">
+                                            <div className="bg-white p-8 rounded-xl text-center border-4 border-blue-500">
+                                                <p className="text-gray-600 mb-2">Variable: counter</p>
+                                                <p className="text-6xl font-bold text-blue-600">{counter}</p>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <button
+                                                    onClick={() => setCounter(counter + 1)}
+                                                    className="py-4 bg-green-500 text-white text-lg font-bold rounded-lg hover:bg-green-600 transition"
+                                                >
+                                                    +1 ⬆️
+                                                </button>
+                                                <button
+                                                    onClick={() => setCounter(0)}
+                                                    className="py-4 bg-gray-500 text-white text-lg font-bold rounded-lg hover:bg-gray-600 transition"
+                                                >
+                                                    Reset 🔄
+                                                </button>
+                                                <button
+                                                    onClick={() => setCounter(counter - 1)}
+                                                    className="py-4 bg-red-500 text-white text-lg font-bold rounded-lg hover:bg-red-600 transition"
+                                                >
+                                                    -1 ⬇️
+                                                </button>
+                                            </div>
+                                            <div className="bg-gray-100 p-4 rounded-lg font-mono text-sm">
+                                                <div className="text-blue-600 font-bold">Scratch-Code:</div>
+                                                <div className="ml-4">Setze [counter] auf [0]</div>
+                                                <div className="ml-4">Wenn [+1] geklickt → Ändere [counter] um [1]</div>
+                                                <div className="ml-4">Wenn [-1] geklickt → Ändere [counter] um [-1]</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Name Storage Example */}
+                                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl">
+                                        <h3 className="text-2xl font-bold mb-4 text-gray-800">👤 Namen speichern</h3>
+                                        <p className="text-gray-600 mb-4">
+                                            Gib deinen Namen ein und speichere ihn in einer Variable!
+                                        </p>
+                                        <div className="space-y-4">
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={playerName}
+                                                    onChange={(e) => setPlayerName(e.target.value)}
+                                                    placeholder="Dein Name..."
+                                                    className="flex-1 px-4 py-3 border-2 border-purple-300 rounded-lg text-lg"
+                                                />
+                                                <button
+                                                    onClick={handleNameSubmit}
+                                                    className="px-6 py-3 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-600 transition"
+                                                >
+                                                    Speichern 💾
+                                                </button>
+                                            </div>
+                                            <div className="bg-white p-6 rounded-xl border-4 border-purple-500 text-center">
+                                                <p className="text-gray-600 mb-2">Variable: spielerName</p>
+                                                <p className="text-3xl font-bold text-purple-600">"{displayName}"</p>
+                                            </div>
+                                            <div className="bg-purple-100 p-4 rounded-lg">
+                                                <p className="text-lg">
+                                                    <strong>Hallo, {displayName}!</strong> 👋 Willkommen im Spiel!
+                                                </p>
+                                            </div>
+                                            <div className="bg-gray-100 p-4 rounded-lg font-mono text-sm">
+                                                <div className="text-purple-600 font-bold">Scratch-Code:</div>
+                                                <div className="ml-4">Setze [spielerName] auf (Antwort)</div>
+                                                <div className="ml-4">sage (verbinde "Hallo " und [spielerName])</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Score Tracker Example */}
+                                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-xl">
+                                        <h3 className="text-2xl font-bold mb-4 text-gray-800">🎮 Spiel-Tracker</h3>
+                                        <p className="text-gray-600 mb-4">
+                                            Ein echtes Spiel nutzt mehrere Variablen gleichzeitig!
+                                        </p>
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="bg-white p-6 rounded-xl border-4 border-yellow-500 text-center">
+                                                    <p className="text-gray-600 mb-1">Variable: punkte</p>
+                                                    <p className="text-4xl font-bold text-yellow-600">🪙 {gameScore}</p>
+                                                </div>
+                                                <div className="bg-white p-6 rounded-xl border-4 border-red-500 text-center">
+                                                    <p className="text-gray-600 mb-1">Variable: leben</p>
+                                                    <p className="text-4xl font-bold text-red-600">
+                                                        {'❤️'.repeat(lives)}
+                                                        {'🖤'.repeat(3 - lives)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <button
+                                                    onClick={collectCoin}
+                                                    className="py-4 bg-yellow-500 text-white text-lg font-bold rounded-lg hover:bg-yellow-600 transition"
+                                                >
+                                                    Münze sammeln 🪙
+                                                </button>
+                                                <button
+                                                    onClick={loseLife}
+                                                    disabled={lives === 0}
+                                                    className="py-4 bg-red-500 text-white text-lg font-bold rounded-lg hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    Leben verlieren 💔
+                                                </button>
+                                            </div>
+                                            {lives === 0 && (
+                                                <div className="bg-red-100 p-4 rounded-lg text-center border-2 border-red-500">
+                                                    <p className="text-2xl font-bold text-red-800">Game Over! 😵</p>
+                                                    <button
+                                                        onClick={() => {
+                                                            setLives(3);
+                                                            setGameScore(0);
+                                                        }}
+                                                        className="mt-2 px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition"
+                                                    >
+                                                        Neu starten 🔄
+                                                    </button>
+                                                </div>
+                                            )}
+                                            <div className="bg-gray-100 p-4 rounded-lg font-mono text-sm">
+                                                <div className="text-orange-600 font-bold">Scratch-Code:</div>
+                                                <div className="ml-4">Setze [punkte] auf [0]</div>
+                                                <div className="ml-4">Setze [leben] auf [3]</div>
+                                                <div className="ml-4">Wenn Münze berührt → Ändere [punkte] um [10]</div>
+                                                <div className="ml-4">Wenn Gegner berührt → Ändere [leben] um [-1]</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Quiz Tab */}
+                            {activeTab === 'quiz' && (
+                                <div>
+                                    <h2 className="text-3xl font-bold mb-6 text-gray-800">Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {!showResults ? (
+                                        <div className="space-y-6">
+                                            {quizQuestions.map((q, index) => (
+                                                <div key={q.id} className="bg-gray-50 p-6 rounded-xl">
+                                                    <p className="text-lg font-semibold mb-4">
+                                                        {index + 1}. {q.question}
+                                                    </p>
+                                                    <div className="space-y-2">
+                                                        {q.options.map((option, optIndex) => (
+                                                            <button
+                                                                key={optIndex}
+                                                                onClick={() => handleQuizAnswer(q.id, optIndex)}
+                                                                className={`w-full p-4 text-left rounded-lg transition ${
+                                                                    quizAnswers[q.id] === optIndex
+                                                                        ? 'bg-green-500 text-white font-semibold'
+                                                                        : 'bg-white hover:bg-green-100 border-2 border-gray-200'
+                                                                }`}
+                                                            >
+                                                                {option}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            
+                                            <button
+                                                onClick={submitQuiz}
+                                                disabled={Object.keys(quizAnswers).length !== quizQuestions.length}
+                                                className="w-full py-4 bg-gradient-to-r from-green-600 to-teal-600 text-white text-xl font-bold rounded-xl hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                Quiz auswerten
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center space-y-6">
+                                            <div className={`text-6xl ${score >= 75 ? 'text-green-500' : score >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
+                                                {score >= 75 ? '🎉' : score >= 50 ? '😊' : '😕'}
+                                            </div>
+                                            <h3 className="text-4xl font-bold text-gray-800">
+                                                Dein Ergebnis: {score}%
+                                            </h3>
+                                            <p className="text-xl text-gray-600">
+                                                {score >= 75 ? 'Ausgezeichnet! Du verstehst Variablen perfekt!' :
+                                                 score >= 50 ? 'Gut gemacht! Mit etwas Übung wirst du noch besser!' :
+                                                 'Schau dir die Theorie noch einmal an und versuch es erneut!'}
+                                            </p>
+                                            {score >= 50 && (
+                                                <button
+                                                    onClick={completeLesson}
+                                                    className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xl font-bold rounded-xl hover:shadow-lg transition"
+                                                >
+                                                    ✓ Lektion abschließen
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => {
+                                                    setShowResults(false);
+                                                    setQuizAnswers({});
+                                                    setScore(0);
+                                                }}
+                                                className="block mx-auto px-6 py-3 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition"
+                                            >
+                                                Quiz wiederholen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<VariablenApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

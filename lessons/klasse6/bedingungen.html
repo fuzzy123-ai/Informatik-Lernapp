@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bedingungen in Scratch - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-yellow-500 to-orange-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function BedingungsApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            const [temperature, setTemperature] = useState(15);
+            const [age, setAge] = useState(10);
+            const [points, setPoints] = useState(50);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was macht eine IF-Bedingung?",
+                    options: ["Sie wiederholt Code", "Sie prüft eine Bedingung und führt Code nur aus, wenn sie wahr ist", "Sie beendet das Programm", "Sie speichert Werte"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Wann wird der ELSE-Teil ausgeführt?",
+                    options: ["Immer", "Nur wenn die IF-Bedingung falsch ist", "Nur wenn die IF-Bedingung wahr ist", "Nie"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Was bedeutet der Operator '>' (größer als)?",
+                    options: ["Links ist kleiner als rechts", "Links ist gleich rechts", "Links ist größer als rechts", "Beide Seiten sind unterschiedlich"],
+                    correct: 2
+                },
+                {
+                    id: 4,
+                    question: "Welche Aussage ist korrekt für: IF (Temperatur > 25)?",
+                    options: ["Wird ausgeführt bei Temperatur 24", "Wird ausgeführt bei Temperatur 25", "Wird ausgeführt bei Temperatur 26", "Wird nie ausgeführt"],
+                    correct: 2
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const submitQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) {
+                        correctCount++;
+                    }
+                });
+                const percentage = Math.round((correctCount / quizQuestions.length) * 100);
+                setScore(percentage);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const token = new URLSearchParams(window.location.search).get('token');
+                if (!token) {
+                    alert('⚠️ Kein Token gefunden! Bitte über das Dashboard anmelden.');
+                    return;
+                }
+
+                const lessonId = 'k6-02';
+                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                const user = users[token];
+                
+                if (!user) {
+                    alert('⚠️ Benutzer nicht gefunden!');
+                    return;
+                }
+
+                if (!user.progress) user.progress = {};
+                user.progress[lessonId] = {
+                    status: 'completed',
+                    score: score,
+                    timestamp: new Date().toISOString()
+                };
+
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('🎉 Lektion abgeschlossen! Score: ' + score + '%');
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const getWeatherAdvice = (temp) => {
+                if (temp < 10) return { text: "Es ist sehr kalt! ❄️ Zieh dich warm an!", color: "text-blue-600" };
+                if (temp < 20) return { text: "Es ist kühl. 🧥 Eine Jacke ist empfehlenswert.", color: "text-cyan-600" };
+                if (temp < 25) return { text: "Angenehme Temperatur! 😊", color: "text-green-600" };
+                return { text: "Es ist heiß! ☀️ Denk an Sonnencreme!", color: "text-orange-600" };
+            };
+
+            const getAgeGroup = (userAge) => {
+                if (userAge < 12) return { text: "Du bist ein Kind 👶", color: "bg-blue-100 text-blue-800" };
+                if (userAge < 18) return { text: "Du bist ein Jugendlicher 🧒", color: "bg-purple-100 text-purple-800" };
+                return { text: "Du bist erwachsen 👨", color: "bg-green-100 text-green-800" };
+            };
+
+            const getGameStatus = (pts) => {
+                if (pts >= 100) return { text: "Level gewonnen! 🏆", color: "bg-green-500", emoji: "🎉" };
+                if (pts >= 50) return { text: "Auf gutem Weg! ⚡", color: "bg-yellow-500", emoji: "💪" };
+                return { text: "Sammle mehr Punkte! 📈", color: "bg-red-500", emoji: "🎮" };
+            };
+
+            const advice = getWeatherAdvice(temperature);
+            const ageGroup = getAgeGroup(age);
+            const gameStatus = getGameStatus(points);
+
+            return (
+                <div className="min-h-screen p-8">
+                    <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-yellow-600 to-orange-600 text-white p-8">
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'} 
+                                className="mb-4 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition"
+                            >
+                                ← Zurück zum Dashboard
+                            </button>
+                            <h1 className="text-4xl font-bold mb-2">❓ Bedingungen in Scratch</h1>
+                            <p className="text-xl opacity-90">Wenn-Dann-Strukturen verstehen</p>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className="flex border-b">
+                            {['theory', 'interactive', 'quiz'].map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`flex-1 py-4 text-lg font-semibold transition ${
+                                        activeTab === tab
+                                            ? 'bg-yellow-100 text-yellow-800 border-b-4 border-yellow-600'
+                                            : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    {tab === 'theory' && '📖 Theorie'}
+                                    {tab === 'interactive' && '🎮 Interaktiv'}
+                                    {tab === 'quiz' && '✅ Quiz'}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-8">
+                            {/* Theory Tab */}
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <h2 className="text-3xl font-bold mb-4 text-gray-800">Was sind Bedingungen?</h2>
+                                        <p className="text-lg text-gray-700 leading-relaxed">
+                                            Bedingungen (auch IF-THEN-ELSE genannt) sind wie Entscheidungen im Alltag. 
+                                            Dein Programm prüft eine Bedingung und führt unterschiedlichen Code aus, je nachdem ob die Bedingung wahr oder falsch ist.
+                                        </p>
+                                    </div>
+
+                                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-xl border-l-4 border-yellow-500">
+                                        <h3 className="text-xl font-bold mb-3 text-yellow-800">💡 Alltags-Beispiel</h3>
+                                        <p className="text-gray-700 text-lg">
+                                            <strong>WENN</strong> es regnet, <strong>DANN</strong> nehme ich einen Regenschirm mit, 
+                                            <strong>SONST</strong> lasse ich ihn zu Hause.
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-2xl font-bold mb-3 text-gray-800">IF-THEN-ELSE in Scratch</h3>
+                                        <div className="bg-purple-100 p-6 rounded-xl">
+                                            <div className="bg-purple-500 text-white p-4 rounded-lg mb-2 font-mono">
+                                                WENN &lt;Temperatur &gt; 25&gt;
+                                            </div>
+                                            <div className="bg-green-400 p-4 rounded-lg mb-2 ml-8 font-mono">
+                                                DANN: sage "Es ist heiß!"
+                                            </div>
+                                            <div className="bg-blue-400 p-4 rounded-lg ml-8 font-mono">
+                                                SONST: sage "Es ist angenehm."
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-2xl font-bold mb-3 text-gray-800">Vergleichs-Operatoren</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="bg-gray-100 p-4 rounded-lg">
+                                                <div className="text-2xl font-bold text-blue-600 mb-2">&gt;</div>
+                                                <p className="font-semibold">Größer als</p>
+                                                <p className="text-sm text-gray-600">5 &gt; 3 → wahr</p>
+                                            </div>
+                                            <div className="bg-gray-100 p-4 rounded-lg">
+                                                <div className="text-2xl font-bold text-blue-600 mb-2">&lt;</div>
+                                                <p className="font-semibold">Kleiner als</p>
+                                                <p className="text-sm text-gray-600">2 &lt; 8 → wahr</p>
+                                            </div>
+                                            <div className="bg-gray-100 p-4 rounded-lg">
+                                                <div className="text-2xl font-bold text-blue-600 mb-2">=</div>
+                                                <p className="font-semibold">Gleich</p>
+                                                <p className="text-sm text-gray-600">7 = 7 → wahr</p>
+                                            </div>
+                                            <div className="bg-gray-100 p-4 rounded-lg">
+                                                <div className="text-2xl font-bold text-blue-600 mb-2">≥ / ≤</div>
+                                                <p className="font-semibold">Größer/Kleiner gleich</p>
+                                                <p className="text-sm text-gray-600">5 ≥ 5 → wahr</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Interactive Tab */}
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-8">
+                                    <h2 className="text-3xl font-bold text-gray-800">Probiere Bedingungen aus!</h2>
+                                    
+                                    {/* Wetter Beispiel */}
+                                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl">
+                                        <h3 className="text-2xl font-bold mb-4 text-gray-800">🌡️ Wetter-Berater</h3>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-lg font-semibold mb-2">
+                                                    Temperatur: {temperature}°C
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    min="-10"
+                                                    max="40"
+                                                    value={temperature}
+                                                    onChange={(e) => setTemperature(parseInt(e.target.value))}
+                                                    className="w-full h-3 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                                                />
+                                            </div>
+                                            <div className={`p-6 rounded-xl bg-white border-4 ${advice.color.includes('blue') ? 'border-blue-400' : advice.color.includes('cyan') ? 'border-cyan-400' : advice.color.includes('green') ? 'border-green-400' : 'border-orange-400'}`}>
+                                                <p className={`text-2xl font-bold ${advice.color}`}>{advice.text}</p>
+                                            </div>
+                                            <div className="bg-gray-100 p-4 rounded-lg font-mono text-sm">
+                                                <div className="text-purple-600 font-bold">WENN Temperatur &lt; 10:</div>
+                                                <div className="ml-4">→ "Es ist sehr kalt!"</div>
+                                                <div className="text-purple-600 font-bold">WENN Temperatur &lt; 20:</div>
+                                                <div className="ml-4">→ "Es ist kühl."</div>
+                                                <div className="text-purple-600 font-bold">WENN Temperatur &lt; 25:</div>
+                                                <div className="ml-4">→ "Angenehme Temperatur!"</div>
+                                                <div className="text-purple-600 font-bold">SONST:</div>
+                                                <div className="ml-4">→ "Es ist heiß!"</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Alters-Checker */}
+                                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl">
+                                        <h3 className="text-2xl font-bold mb-4 text-gray-800">👤 Alters-Gruppe</h3>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-lg font-semibold mb-2">
+                                                    Dein Alter: {age} Jahre
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    min="1"
+                                                    max="30"
+                                                    value={age}
+                                                    onChange={(e) => setAge(parseInt(e.target.value))}
+                                                    className="w-full h-3 bg-purple-200 rounded-lg appearance-none cursor-pointer"
+                                                />
+                                            </div>
+                                            <div className={`p-6 rounded-xl ${ageGroup.color} text-center`}>
+                                                <p className="text-2xl font-bold">{ageGroup.text}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Game Score */}
+                                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl">
+                                        <h3 className="text-2xl font-bold mb-4 text-gray-800">🎮 Spiel-Status</h3>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-lg font-semibold mb-2">
+                                                    Punkte: {points}
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="150"
+                                                    value={points}
+                                                    onChange={(e) => setPoints(parseInt(e.target.value))}
+                                                    className="w-full h-3 bg-green-200 rounded-lg appearance-none cursor-pointer"
+                                                />
+                                            </div>
+                                            <div className={`${gameStatus.color} p-6 rounded-xl text-white text-center`}>
+                                                <p className="text-4xl mb-2">{gameStatus.emoji}</p>
+                                                <p className="text-2xl font-bold">{gameStatus.text}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Quiz Tab */}
+                            {activeTab === 'quiz' && (
+                                <div>
+                                    <h2 className="text-3xl font-bold mb-6 text-gray-800">Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {!showResults ? (
+                                        <div className="space-y-6">
+                                            {quizQuestions.map((q, index) => (
+                                                <div key={q.id} className="bg-gray-50 p-6 rounded-xl">
+                                                    <p className="text-lg font-semibold mb-4">
+                                                        {index + 1}. {q.question}
+                                                    </p>
+                                                    <div className="space-y-2">
+                                                        {q.options.map((option, optIndex) => (
+                                                            <button
+                                                                key={optIndex}
+                                                                onClick={() => handleQuizAnswer(q.id, optIndex)}
+                                                                className={`w-full p-4 text-left rounded-lg transition ${
+                                                                    quizAnswers[q.id] === optIndex
+                                                                        ? 'bg-yellow-500 text-white font-semibold'
+                                                                        : 'bg-white hover:bg-yellow-100 border-2 border-gray-200'
+                                                                }`}
+                                                            >
+                                                                {option}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            
+                                            <button
+                                                onClick={submitQuiz}
+                                                disabled={Object.keys(quizAnswers).length !== quizQuestions.length}
+                                                className="w-full py-4 bg-gradient-to-r from-yellow-600 to-orange-600 text-white text-xl font-bold rounded-xl hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                Quiz auswerten
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center space-y-6">
+                                            <div className={`text-6xl ${score >= 75 ? 'text-green-500' : score >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
+                                                {score >= 75 ? '🎉' : score >= 50 ? '😊' : '😕'}
+                                            </div>
+                                            <h3 className="text-4xl font-bold text-gray-800">
+                                                Dein Ergebnis: {score}%
+                                            </h3>
+                                            <p className="text-xl text-gray-600">
+                                                {score >= 75 ? 'Ausgezeichnet! Du hast Bedingungen super verstanden!' :
+                                                 score >= 50 ? 'Gut gemacht! Mit etwas Übung wirst du noch besser!' :
+                                                 'Schau dir die Theorie noch einmal an und versuch es erneut!'}
+                                            </p>
+                                            {score >= 50 && (
+                                                <button
+                                                    onClick={completeLesson}
+                                                    className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xl font-bold rounded-xl hover:shadow-lg transition"
+                                                >
+                                                    ✓ Lektion abschließen
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => {
+                                                    setShowResults(false);
+                                                    setQuizAnswers({});
+                                                    setScore(0);
+                                                }}
+                                                className="block mx-auto px-6 py-3 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition"
+                                            >
+                                                Quiz wiederholen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<BedingungsApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
