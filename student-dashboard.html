@@ -39,14 +39,17 @@
     <script src="js/auth.js"></script>
     <script src="js/progress.js"></script>
     <script>
-        // Auth Check
-        requireAuth('student');
+        // Auth Check - stop execution if not authenticated
+        if (!requireAuth('student')) {
+            throw new Error('Not authenticated');
+        }
 
         const session = getCurrentSession();
         const user = getUserData(session.token);
 
         if (!user) {
             logout();
+            throw new Error('User not found');
         }
 
         // User Info anzeigen

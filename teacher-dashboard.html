@@ -145,8 +145,10 @@
     <script src="js/auth.js"></script>
     <script src="js/progress.js"></script>
     <script>
-        // Auth Check
-        requireAuth('teacher');
+        // Auth Check - stop execution if not authenticated
+        if (!requireAuth('teacher')) {
+            throw new Error('Not authenticated');
+        }
 
         let currentClass = null;
         
