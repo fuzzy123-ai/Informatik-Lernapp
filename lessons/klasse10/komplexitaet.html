@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Komplexität - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-500 to-gray-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function KomplexitaetApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            
+            const [arraySize, setArraySize] = useState(100);
+            const [benchmarkResults, setBenchmarkResults] = useState({});
+            const [isRunning, setIsRunning] = useState(false);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was beschreibt die Big-O Notation?",
+                    options: ["Die Programmgröße", "Die Zeitkomplexität", "Die Dateigröße", "Die Anzahl Variablen"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Welche Komplexität ist am schnellsten?",
+                    options: ["O(n²)", "O(n)", "O(log n)", "O(1)"],
+                    correct: 3
+                },
+                {
+                    id: 3,
+                    question: "Was ist die Komplexität von Bubble Sort?",
+                    options: ["O(1)", "O(n)", "O(n log n)", "O(n²)"],
+                    correct: 3
+                },
+                {
+                    id: 4,
+                    question: "Wann ist O(log n) wichtig?",
+                    options: ["Bei linearer Suche", "Bei binärer Suche", "Bei konstanter Zeit", "Bei doppelter Schleife"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k10-01';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const runBenchmark = () => {
+                setIsRunning(true);
+                const arr = Array.from({length: arraySize}, () => Math.floor(Math.random() * 1000));
+                
+                setTimeout(() => {
+                    // O(1) - Konstant
+                    const start1 = performance.now();
+                    const first = arr[0];
+                    const time1 = performance.now() - start1;
+                    
+                    // O(n) - Linear
+                    const start2 = performance.now();
+                    let sum = 0;
+                    for (let i = 0; i < arr.length; i++) sum += arr[i];
+                    const time2 = performance.now() - start2;
+                    
+                    // O(n log n) - Linearithmisch
+                    const start3 = performance.now();
+                    const sorted = [...arr].sort((a, b) => a - b);
+                    const time3 = performance.now() - start3;
+                    
+                    // O(n²) - Quadratisch (vereinfacht)
+                    const start4 = performance.now();
+                    let count = 0;
+                    for (let i = 0; i < Math.min(arr.length, 50); i++) {
+                        for (let j = 0; j < Math.min(arr.length, 50); j++) {
+                            count++;
+                        }
+                    }
+                    const time4 = performance.now() - start4;
+                    
+                    setBenchmarkResults({
+                        o1: time1.toFixed(4),
+                        on: time2.toFixed(4),
+                        onlogn: time3.toFixed(4),
+                        on2: time4.toFixed(4)
+                    });
+                    setIsRunning(false);
+                }, 100);
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">📈</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Komplexität</h1>
+                                    <p className="text-gray-600">Klasse 10 - Big-O Notation</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-slate-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-slate-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-slate-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📈 Was ist Algorithmische Komplexität?</h2>
+                                        <div className="bg-slate-50 border-l-4 border-slate-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Die <strong>Komplexität</strong> eines Algorithmus beschreibt, wie die Laufzeit oder der Speicherbedarf 
+                                                mit der Größe der Eingabedaten wächst. Die <strong>Big-O Notation</strong> wird verwendet, um das Wachstum zu beschreiben.
+                                            </p>
+                                        </div>
+                                        <div className="bg-blue-50 rounded-lg p-4">
+                                            <h3 className="font-bold mb-2">Warum ist das wichtig?</h3>
+                                            <ul className="space-y-1 text-gray-700">
+                                                <li>⚡ Schnellere Programme schreiben</li>
+                                                <li>📊 Algorithmen vergleichen</li>
+                                                <li>🎯 Den richtigen Algorithmus wählen</li>
+                                                <li>💡 Engpässe erkennen</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎯 Big-O Klassen</h2>
+                                        
+                                        <div className="space-y-3">
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">O(1) - Konstante Zeit</h3>
+                                                <p className="text-sm text-gray-700 mb-2">
+                                                    <strong>Egal wie groß die Eingabe:</strong> Immer gleich schnell!
+                                                </p>
+                                                <div className="bg-white rounded p-2 font-mono text-sm">
+                                                    array[0] // Zugriff auf erstes Element
+                                                </div>
+                                                <p className="text-xs text-gray-600 mt-1">⚡ Sehr schnell!</p>
+                                            </div>
+
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-blue-800 mb-2">O(log n) - Logarithmisch</h3>
+                                                <p className="text-sm text-gray-700 mb-2">
+                                                    <strong>Halbiert Suchbereich:</strong> Sehr effizient bei großen Datenmengen
+                                                </p>
+                                                <div className="bg-white rounded p-2 font-mono text-sm">
+                                                    Binäre Suche
+                                                </div>
+                                                <p className="text-xs text-gray-600 mt-1">⚡ Schnell!</p>
+                                            </div>
+
+                                            <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-yellow-800 mb-2">O(n) - Linear</h3>
+                                                <p className="text-sm text-gray-700 mb-2">
+                                                    <strong>Jedes Element einmal:</strong> Zeit verdoppelt sich bei doppelter Größe
+                                                </p>
+                                                <div className="bg-white rounded p-2 font-mono text-sm">
+                                                    for (let i = 0; i {'<'} n; i++) {'{'}...{'}'}
+                                                </div>
+                                                <p className="text-xs text-gray-600 mt-1">👍 Akzeptabel</p>
+                                            </div>
+
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-orange-800 mb-2">O(n log n) - Linearithmisch</h3>
+                                                <p className="text-sm text-gray-700 mb-2">
+                                                    <strong>Effiziente Sortieralgorithmen:</strong> Gut für große Datenmengen
+                                                </p>
+                                                <div className="bg-white rounded p-2 font-mono text-sm">
+                                                    Merge Sort, Quick Sort
+                                                </div>
+                                                <p className="text-xs text-gray-600 mt-1">👍 Gut für Sortieren</p>
+                                            </div>
+
+                                            <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-red-800 mb-2">O(n²) - Quadratisch</h3>
+                                                <p className="text-sm text-gray-700 mb-2">
+                                                    <strong>Verschachtelte Schleifen:</strong> Langsam bei großen Daten
+                                                </p>
+                                                <div className="bg-white rounded p-2 font-mono text-sm">
+                                                    for (i...) {'{'} for (j...) {'{'}...{'}'} {'}'}
+                                                </div>
+                                                <p className="text-xs text-gray-600 mt-1">⚠️ Langsam bei großen n!</p>
+                                            </div>
+
+                                            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-purple-800 mb-2">O(2ⁿ) - Exponentiell</h3>
+                                                <p className="text-sm text-gray-700 mb-2">
+                                                    <strong>Sehr langsam:</strong> Zeit verdoppelt sich pro Element
+                                                </p>
+                                                <div className="bg-white rounded p-2 font-mono text-sm">
+                                                    Naive Fibonacci-Rekursion
+                                                </div>
+                                                <p className="text-xs text-gray-600 mt-1">❌ Sehr langsam!</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Wachstumsvergleich</h2>
+                                        <div className="bg-gray-100 rounded-lg p-4">
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-gray-200">
+                                                        <tr>
+                                                            <th className="p-2 border">n</th>
+                                                            <th className="p-2 border">O(1)</th>
+                                                            <th className="p-2 border">O(log n)</th>
+                                                            <th className="p-2 border">O(n)</th>
+                                                            <th className="p-2 border">O(n log n)</th>
+                                                            <th className="p-2 border">O(n²)</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr className="bg-white">
+                                                            <td className="p-2 border font-bold">10</td>
+                                                            <td className="p-2 border">1</td>
+                                                            <td className="p-2 border">3</td>
+                                                            <td className="p-2 border">10</td>
+                                                            <td className="p-2 border">30</td>
+                                                            <td className="p-2 border">100</td>
+                                                        </tr>
+                                                        <tr className="bg-gray-50">
+                                                            <td className="p-2 border font-bold">100</td>
+                                                            <td className="p-2 border">1</td>
+                                                            <td className="p-2 border">7</td>
+                                                            <td className="p-2 border">100</td>
+                                                            <td className="p-2 border">700</td>
+                                                            <td className="p-2 border text-red-600">10,000</td>
+                                                        </tr>
+                                                        <tr className="bg-white">
+                                                            <td className="p-2 border font-bold">1,000</td>
+                                                            <td className="p-2 border">1</td>
+                                                            <td className="p-2 border">10</td>
+                                                            <td className="p-2 border">1,000</td>
+                                                            <td className="p-2 border">10,000</td>
+                                                            <td className="p-2 border text-red-600">1,000,000</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <p className="text-xs text-gray-600 mt-2 text-center">
+                                                Anzahl der Operationen bei verschiedenen Eingabegrößen
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💡 Praxis-Tipps</h2>
+                                        <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
+                                            <ul className="space-y-2 text-gray-700">
+                                                <li>✅ <strong>Vermeide verschachtelte Schleifen</strong> wenn möglich</li>
+                                                <li>✅ <strong>Nutze Hash-Tables</strong> für O(1) Zugriff</li>
+                                                <li>✅ <strong>Sortiere einmal</strong>, suche dann mit binärer Suche</li>
+                                                <li>✅ <strong>Teile und herrsche:</strong> Große Probleme aufteilen</li>
+                                                <li>❌ <strong>Vermeide O(n²)</strong> bei großen Datenmengen</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">⚡ Komplexitäts-Benchmark</h2>
+                                        <div className="bg-slate-50 rounded-lg p-6">
+                                            <div className="mb-4">
+                                                <label className="block font-semibold mb-2">Array-Größe: {arraySize}</label>
+                                                <input
+                                                    type="range"
+                                                    min="10"
+                                                    max="1000"
+                                                    step="10"
+                                                    value={arraySize}
+                                                    onChange={(e) => setArraySize(parseInt(e.target.value))}
+                                                    className="w-full"
+                                                    disabled={isRunning}
+                                                />
+                                                <div className="flex justify-between text-xs text-gray-600 mt-1">
+                                                    <span>10</span>
+                                                    <span>500</span>
+                                                    <span>1000</span>
+                                                </div>
+                                            </div>
+
+                                            <button 
+                                                onClick={runBenchmark}
+                                                disabled={isRunning}
+                                                className={`w-full py-3 rounded-lg font-semibold mb-4 ${isRunning ? 'bg-gray-400 cursor-not-allowed' : 'bg-slate-500 hover:bg-slate-600'} text-white`}
+                                            >
+                                                {isRunning ? '⏳ Läuft...' : '▶ Benchmark starten'}
+                                            </button>
+
+                                            {Object.keys(benchmarkResults).length > 0 && (
+                                                <div className="space-y-3">
+                                                    <div className="bg-green-100 border-2 border-green-500 rounded-lg p-3">
+                                                        <div className="flex justify-between items-center">
+                                                            <div>
+                                                                <h4 className="font-bold text-green-800">O(1) - Konstant</h4>
+                                                                <p className="text-xs text-gray-600">Direkter Array-Zugriff</p>
+                                                            </div>
+                                                            <p className="text-2xl font-bold text-green-800">{benchmarkResults.o1}ms</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="bg-blue-100 border-2 border-blue-500 rounded-lg p-3">
+                                                        <div className="flex justify-between items-center">
+                                                            <div>
+                                                                <h4 className="font-bold text-blue-800">O(n) - Linear</h4>
+                                                                <p className="text-xs text-gray-600">Summe berechnen</p>
+                                                            </div>
+                                                            <p className="text-2xl font-bold text-blue-800">{benchmarkResults.on}ms</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="bg-yellow-100 border-2 border-yellow-500 rounded-lg p-3">
+                                                        <div className="flex justify-between items-center">
+                                                            <div>
+                                                                <h4 className="font-bold text-yellow-800">O(n log n)</h4>
+                                                                <p className="text-xs text-gray-600">Array sortieren</p>
+                                                            </div>
+                                                            <p className="text-2xl font-bold text-yellow-800">{benchmarkResults.onlogn}ms</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="bg-red-100 border-2 border-red-500 rounded-lg p-3">
+                                                        <div className="flex justify-between items-center">
+                                                            <div>
+                                                                <h4 className="font-bold text-red-800">O(n²) - Quadratisch</h4>
+                                                                <p className="text-xs text-gray-600">Verschachtelte Schleife</p>
+                                                            </div>
+                                                            <p className="text-2xl font-bold text-red-800">{benchmarkResults.on2}ms</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Wachstumsgraph</h2>
+                                        <div className="bg-white rounded-lg p-6 border-2 border-gray-300">
+                                            <svg width="100%" height="300" viewBox="0 0 500 300">
+                                                {/* Achsen */}
+                                                <line x1="50" y1="250" x2="450" y2="250" stroke="#000" strokeWidth="2" />
+                                                <line x1="50" y1="250" x2="50" y2="20" stroke="#000" strokeWidth="2" />
+                                                <text x="250" y="280" textAnchor="middle" fontSize="12">Eingabegröße (n)</text>
+                                                <text x="20" y="150" fontSize="12" transform="rotate(-90 20 150)">Zeit</text>
+                                                
+                                                {/* O(1) - Grün */}
+                                                <line x1="50" y1="240" x2="450" y2="240" stroke="#10b981" strokeWidth="3" />
+                                                <text x="455" y="245" fill="#10b981" fontSize="12" fontWeight="bold">O(1)</text>
+                                                
+                                                {/* O(log n) - Blau */}
+                                                <path d="M 50 240 Q 150 220, 250 210 T 450 200" stroke="#3b82f6" fill="none" strokeWidth="3" />
+                                                <text x="455" y="205" fill="#3b82f6" fontSize="12" fontWeight="bold">O(log n)</text>
+                                                
+                                                {/* O(n) - Gelb */}
+                                                <line x1="50" y1="240" x2="450" y2="80" stroke="#eab308" strokeWidth="3" />
+                                                <text x="455" y="85" fill="#eab308" fontSize="12" fontWeight="bold">O(n)</text>
+                                                
+                                                {/* O(n²) - Rot */}
+                                                <path d="M 50 240 Q 150 180, 250 100 T 450 30" stroke="#ef4444" fill="none" strokeWidth="3" />
+                                                <text x="455" y="35" fill="#ef4444" fontSize="12" fontWeight="bold">O(n²)</text>
+                                            </svg>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span>{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-slate-500 text-white rounded-lg font-bold hover:bg-slate-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-slate-500 to-gray-600 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du bist ein Komplexitäts-Experte!' :
+                                                 score >= 3 ? '👍 Gut gemacht!' :
+                                                 score >= 2 ? '📚 Nicht schlecht, aber übe noch!' :
+                                                 '💪 Lies die Theorie nochmal und versuche es erneut!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-slate-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<KomplexitaetApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

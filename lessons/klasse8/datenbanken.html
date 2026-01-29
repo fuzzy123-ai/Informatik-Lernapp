@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datenbanken - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-cyan-500 to-blue-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function DatenbankenApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            
+            const [database, setDatabase] = useState([
+                { id: 1, name: 'Anna', alter: 15, klasse: '9a' },
+                { id: 2, name: 'Ben', alter: 14, klasse: '8b' },
+                { id: 3, name: 'Clara', alter: 15, klasse: '9a' },
+                { id: 4, name: 'David', alter: 16, klasse: '10c' }
+            ]);
+            const [sqlQuery, setSqlQuery] = useState('SELECT * FROM schueler');
+            const [queryResult, setQueryResult] = useState([]);
+            const [queryError, setQueryError] = useState('');
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was ist eine Datenbank?",
+                    options: ["Ein Ordner für Dateien", "Ein organisiertes System zum Speichern von Daten", "Ein Textdokument", "Eine Website"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Was bedeutet 'SELECT' in SQL?",
+                    options: ["Daten löschen", "Daten aktualisieren", "Daten abfragen/abrufen", "Daten einfügen"],
+                    correct: 2
+                },
+                {
+                    id: 3,
+                    question: "Was ist ein Primärschlüssel?",
+                    options: ["Ein Passwort", "Ein eindeutiger Identifikator für einen Datensatz", "Ein verschlüsselter Wert", "Ein Spaltenname"],
+                    correct: 1
+                },
+                {
+                    id: 4,
+                    question: "Welche Komponente gehört zu einer Datenbank-Tabelle?",
+                    options: ["Seiten", "Zeilen und Spalten", "Ordner", "Links"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k8-05';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const executeQuery = () => {
+                setQueryError('');
+                const query = sqlQuery.trim().toUpperCase();
+                
+                try {
+                    if (query.includes('SELECT * FROM SCHUELER')) {
+                        setQueryResult(database);
+                    } else if (query.includes('WHERE ALTER = 15')) {
+                        setQueryResult(database.filter(s => s.alter === 15));
+                    } else if (query.includes('WHERE KLASSE = \'9A\'')) {
+                        setQueryResult(database.filter(s => s.klasse === '9a'));
+                    } else if (query.includes('WHERE NAME = \'BEN\'')) {
+                        setQueryResult(database.filter(s => s.name === 'Ben'));
+                    } else if (query.includes('SELECT NAME FROM SCHUELER')) {
+                        setQueryResult(database.map(s => ({ name: s.name })));
+                    } else {
+                        setQueryError('Query nicht unterstützt. Versuche: SELECT * FROM schueler oder SELECT * FROM schueler WHERE alter = 15');
+                        setQueryResult([]);
+                    }
+                } catch (e) {
+                    setQueryError('Fehler beim Ausführen der Query');
+                    setQueryResult([]);
+                }
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">🗄️</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Datenbanken</h1>
+                                    <p className="text-gray-600">Klasse 8 - SQL und Tabellen</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-cyan-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-cyan-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-cyan-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🗄️ Was ist eine Datenbank?</h2>
+                                        <div className="bg-cyan-50 border-l-4 border-cyan-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Eine <strong>Datenbank</strong> ist ein organisiertes System zum Speichern, Verwalten und Abrufen von Daten.
+                                                Sie ermöglicht es, große Mengen an Informationen strukturiert zu speichern und schnell darauf zuzugreifen.
+                                            </p>
+                                        </div>
+                                        <div className="bg-blue-50 rounded-lg p-4">
+                                            <h3 className="font-bold mb-2">Beispiele für Datenbanken im Alltag:</h3>
+                                            <ul className="space-y-1 text-gray-700">
+                                                <li>📱 Kontakte auf deinem Smartphone</li>
+                                                <li>🏫 Schülerverwaltung einer Schule</li>
+                                                <li>🛒 Online-Shop Produktkataloge</li>
+                                                <li>📚 Bibliothekssysteme</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Tabellen: Die Grundlage</h2>
+                                        <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 mb-4">
+                                            <h3 className="font-bold text-purple-800 mb-2">Aufbau einer Tabelle</h3>
+                                            <p className="text-gray-700 mb-3">
+                                                Datenbanken organisieren Informationen in <strong>Tabellen</strong>, ähnlich wie Excel.
+                                                Jede Tabelle hat <strong>Spalten</strong> (Attribute) und <strong>Zeilen</strong> (Datensätze).
+                                            </p>
+                                            <div className="bg-white rounded-lg p-3 overflow-x-auto">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-gray-200">
+                                                        <tr>
+                                                            <th className="p-2 border">ID</th>
+                                                            <th className="p-2 border">Name</th>
+                                                            <th className="p-2 border">Alter</th>
+                                                            <th className="p-2 border">Klasse</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td className="p-2 border">1</td>
+                                                            <td className="p-2 border">Anna</td>
+                                                            <td className="p-2 border">15</td>
+                                                            <td className="p-2 border">9a</td>
+                                                        </tr>
+                                                        <tr className="bg-gray-50">
+                                                            <td className="p-2 border">2</td>
+                                                            <td className="p-2 border">Ben</td>
+                                                            <td className="p-2 border">14</td>
+                                                            <td className="p-2 border">8b</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-3">
+                                            <p className="text-sm"><strong>Primärschlüssel:</strong> Die ID ist eindeutig und identifiziert jeden Datensatz.</p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💬 SQL: Die Sprache der Datenbanken</h2>
+                                        <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 mb-4">
+                                            <p className="text-gray-700 mb-3">
+                                                <strong>SQL (Structured Query Language)</strong> ist die Standardsprache zum Arbeiten mit Datenbanken.
+                                            </p>
+                                            <div className="bg-white rounded-lg p-3 space-y-3">
+                                                <div>
+                                                    <h4 className="font-semibold text-green-800">SELECT - Daten abfragen</h4>
+                                                    <code className="bg-gray-100 px-2 py-1 rounded text-sm">SELECT * FROM schueler</code>
+                                                    <p className="text-xs text-gray-600 mt-1">Zeigt alle Datensätze der Tabelle "schueler"</p>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-semibold text-green-800">WHERE - Filtern</h4>
+                                                    <code className="bg-gray-100 px-2 py-1 rounded text-sm">SELECT * FROM schueler WHERE alter = 15</code>
+                                                    <p className="text-xs text-gray-600 mt-1">Zeigt nur Schüler mit Alter 15</p>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-semibold text-green-800">INSERT - Daten einfügen</h4>
+                                                    <code className="bg-gray-100 px-2 py-1 rounded text-sm">INSERT INTO schueler VALUES (3, 'Clara', 15, '9a')</code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">✨ Vorteile von Datenbanken</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-blue-800 mb-1">📦 Strukturiert</h3>
+                                                <p className="text-sm text-gray-600">Daten sind organisiert und leicht zu finden</p>
+                                            </div>
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-green-800 mb-1">⚡ Schnell</h3>
+                                                <p className="text-sm text-gray-600">Millionen Datensätze in Sekunden durchsuchen</p>
+                                            </div>
+                                            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-purple-800 mb-1">🔒 Sicher</h3>
+                                                <p className="text-sm text-gray-600">Zugriffsrechte und Datenschutz</p>
+                                            </div>
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-orange-800 mb-1">👥 Mehrbenutzer</h3>
+                                                <p className="text-sm text-gray-600">Mehrere Personen können gleichzeitig arbeiten</p>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💻 SQL Query Builder</h2>
+                                        <div className="bg-cyan-50 rounded-lg p-6">
+                                            <h3 className="font-bold mb-3">Tabelle: schueler</h3>
+                                            <div className="bg-white rounded-lg p-4 mb-4 overflow-x-auto">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-gray-200">
+                                                        <tr>
+                                                            <th className="p-2 border">ID</th>
+                                                            <th className="p-2 border">Name</th>
+                                                            <th className="p-2 border">Alter</th>
+                                                            <th className="p-2 border">Klasse</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {database.map((row, i) => (
+                                                            <tr key={row.id} className={i % 2 === 0 ? 'bg-gray-50' : ''}>
+                                                                <td className="p-2 border">{row.id}</td>
+                                                                <td className="p-2 border">{row.name}</td>
+                                                                <td className="p-2 border">{row.alter}</td>
+                                                                <td className="p-2 border">{row.klasse}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div className="mb-4">
+                                                <label className="block font-semibold mb-2">SQL Query eingeben:</label>
+                                                <textarea
+                                                    value={sqlQuery}
+                                                    onChange={(e) => setSqlQuery(e.target.value)}
+                                                    className="w-full p-3 border-2 border-gray-300 rounded-lg font-mono text-sm"
+                                                    rows="3"
+                                                    placeholder="SELECT * FROM schueler"
+                                                />
+                                                <div className="mt-2 space-y-1 text-xs text-gray-600">
+                                                    <p>💡 Versuche: <code className="bg-gray-100 px-1 rounded">SELECT * FROM schueler WHERE alter = 15</code></p>
+                                                    <p>💡 Oder: <code className="bg-gray-100 px-1 rounded">SELECT * FROM schueler WHERE klasse = '9a'</code></p>
+                                                </div>
+                                            </div>
+
+                                            <button 
+                                                onClick={executeQuery}
+                                                className="w-full bg-cyan-500 text-white py-3 rounded-lg hover:bg-cyan-600 font-semibold mb-4"
+                                            >
+                                                ▶ Query ausführen
+                                            </button>
+
+                                            {queryError && (
+                                                <div className="bg-red-100 border-2 border-red-500 rounded-lg p-3 mb-4">
+                                                    <p className="text-red-800">❌ {queryError}</p>
+                                                </div>
+                                            )}
+
+                                            {queryResult.length > 0 && (
+                                                <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4">
+                                                    <h4 className="font-bold text-green-800 mb-3">✓ Ergebnis ({queryResult.length} Zeilen):</h4>
+                                                    <div className="bg-white rounded-lg p-3 overflow-x-auto">
+                                                        <table className="w-full text-sm">
+                                                            <thead className="bg-green-100">
+                                                                <tr>
+                                                                    {Object.keys(queryResult[0]).map(key => (
+                                                                        <th key={key} className="p-2 border">{key.toUpperCase()}</th>
+                                                                    ))}
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {queryResult.map((row, i) => (
+                                                                    <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : ''}>
+                                                                        {Object.values(row).map((val, j) => (
+                                                                            <td key={j} className="p-2 border">{val}</td>
+                                                                        ))}
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📖 SQL Cheat Sheet</h2>
+                                        <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                            <div className="space-y-2 text-sm">
+                                                <div className="bg-white p-2 rounded">
+                                                    <strong>Alle Daten:</strong> <code>SELECT * FROM schueler</code>
+                                                </div>
+                                                <div className="bg-white p-2 rounded">
+                                                    <strong>Nur Namen:</strong> <code>SELECT name FROM schueler</code>
+                                                </div>
+                                                <div className="bg-white p-2 rounded">
+                                                    <strong>Filtern:</strong> <code>SELECT * FROM schueler WHERE alter = 15</code>
+                                                </div>
+                                                <div className="bg-white p-2 rounded">
+                                                    <strong>Sortieren:</strong> <code>SELECT * FROM schueler ORDER BY name</code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span>{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-cyan-500 text-white rounded-lg font-bold hover:bg-cyan-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du bist ein Datenbank-Experte!' :
+                                                 score >= 3 ? '👍 Gut gemacht!' :
+                                                 score >= 2 ? '📚 Nicht schlecht, aber übe noch!' :
+                                                 '💪 Lies die Theorie nochmal und versuche es erneut!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-cyan-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<DatenbankenApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

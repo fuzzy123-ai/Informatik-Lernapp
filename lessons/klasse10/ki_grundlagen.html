@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI Grundlagen - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-teal-500 to-cyan-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function KIApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            
+            const [trainingData, setTrainingData] = useState([
+                { hours: 1, grade: 60 },
+                { hours: 2, grade: 70 },
+                { hours: 4, grade: 85 },
+                { hours: 6, grade: 95 }
+            ]);
+            const [predictHours, setPredictHours] = useState(3);
+            const [prediction, setPrediction] = useState(null);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was ist Künstliche Intelligenz?",
+                    options: ["Ein Roboter", "Computersysteme, die menschliche Intelligenz nachahmen", "Eine Programmiersprache", "Ein Betriebssystem"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Was ist Machine Learning?",
+                    options: ["Computer lernen aus Daten", "Computer werden programmiert", "Computer werden gebaut", "Computer werden repariert"],
+                    correct: 0
+                },
+                {
+                    id: 3,
+                    question: "Was braucht ein KI-Modell zum Lernen?",
+                    options: ["Strom", "Trainingsdaten", "Internet", "Nur Code"],
+                    correct: 1
+                },
+                {
+                    id: 4,
+                    question: "Was ist ein neuronales Netz?",
+                    options: ["Ein Computernetzwerk", "Ein Modell inspiriert vom Gehirn", "Ein Kabel", "Eine Website"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k10-02';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const predictGrade = () => {
+                // Simple linear regression approximation
+                const avgHours = trainingData.reduce((sum, d) => sum + d.hours, 0) / trainingData.length;
+                const avgGrade = trainingData.reduce((sum, d) => sum + d.grade, 0) / trainingData.length;
+                
+                let numerator = 0;
+                let denominator = 0;
+                trainingData.forEach(d => {
+                    numerator += (d.hours - avgHours) * (d.grade - avgGrade);
+                    denominator += (d.hours - avgHours) ** 2;
+                });
+                
+                const slope = numerator / denominator;
+                const intercept = avgGrade - slope * avgHours;
+                const predicted = Math.round(slope * predictHours + intercept);
+                setPrediction(Math.max(0, Math.min(100, predicted)));
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">🤖</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">KI Grundlagen</h1>
+                                    <p className="text-gray-600">Klasse 10 - Künstliche Intelligenz & Machine Learning</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🤖 Was ist Künstliche Intelligenz?</h2>
+                                        <div className="bg-teal-50 border-l-4 border-teal-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                <strong>Künstliche Intelligenz (KI)</strong> bezeichnet Computersysteme, die Aufgaben ausführen,
+                                                die normalerweise menschliche Intelligenz erfordern, wie Lernen, Problemlösen oder Mustererkennung.
+                                            </p>
+                                        </div>
+                                        <div className="bg-blue-50 rounded-lg p-4">
+                                            <h3 className="font-bold mb-2">KI im Alltag:</h3>
+                                            <ul className="space-y-1 text-gray-700">
+                                                <li>🔍 Google-Suche und Sprachassistenten (Siri, Alexa)</li>
+                                                <li>📱 Gesichtserkennung auf Smartphones</li>
+                                                <li>🎵 Musik-/Filmempfehlungen (Spotify, Netflix)</li>
+                                                <li>🚗 Autonome Fahrzeuge</li>
+                                                <li>🎮 NPCs in Videospielen</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🧠 Machine Learning</h2>
+                                        <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 mb-4">
+                                            <h3 className="font-bold text-green-800 mb-2">Lernen aus Daten</h3>
+                                            <p className="text-gray-700 mb-3">
+                                                <strong>Machine Learning (ML)</strong> ist ein Teilbereich der KI. Computer lernen aus Daten, 
+                                                ohne explizit programmiert zu werden.
+                                            </p>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <h4 className="font-semibold mb-2">Der Prozess:</h4>
+                                                <ol className="space-y-1 text-sm text-gray-700 list-decimal list-inside">
+                                                    <li><strong>Daten sammeln:</strong> Viele Beispiele (z.B. Bilder von Katzen)</li>
+                                                    <li><strong>Training:</strong> Modell lernt Muster in den Daten</li>
+                                                    <li><strong>Testen:</strong> Prüfen, wie gut das Modell ist</li>
+                                                    <li><strong>Vorhersagen:</strong> Auf neue Daten anwenden</li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎯 Arten von Machine Learning</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-purple-800 mb-1">Supervised Learning</h3>
+                                                <p className="text-sm text-gray-600">Lernen mit beschrifteten Daten (z.B. Spam-Erkennung)</p>
+                                            </div>
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-orange-800 mb-1">Unsupervised Learning</h3>
+                                                <p className="text-sm text-gray-600">Muster in unbeschrifteten Daten finden</p>
+                                            </div>
+                                            <div className="bg-pink-50 border-2 border-pink-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-pink-800 mb-1">Reinforcement Learning</h3>
+                                                <p className="text-sm text-gray-600">Lernen durch Belohnung/Bestrafung (z.B. Spiele)</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🌐 Neuronale Netze</h2>
+                                        <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                            <h3 className="font-bold text-blue-800 mb-2">Inspiriert vom Gehirn</h3>
+                                            <p className="text-gray-700 mb-3">
+                                                <strong>Neuronale Netze</strong> sind ML-Modelle, die vom menschlichen Gehirn inspiriert sind.
+                                                Sie bestehen aus Schichten künstlicher Neuronen.
+                                            </p>
+                                            <div className="bg-white rounded-lg p-3 text-center">
+                                                <div className="flex justify-around items-center">
+                                                    <div className="text-center">
+                                                        <div className="bg-green-200 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-1">
+                                                            <span className="font-bold">Input</span>
+                                                        </div>
+                                                        <p className="text-xs">Eingabe</p>
+                                                    </div>
+                                                    <div className="text-2xl">→</div>
+                                                    <div className="text-center">
+                                                        <div className="bg-blue-200 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-1">
+                                                            <span className="font-bold">Hidden</span>
+                                                        </div>
+                                                        <p className="text-xs">Versteckt</p>
+                                                    </div>
+                                                    <div className="text-2xl">→</div>
+                                                    <div className="text-center">
+                                                        <div className="bg-purple-200 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-1">
+                                                            <span className="font-bold">Output</span>
+                                                        </div>
+                                                        <p className="text-xs">Ausgabe</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">⚖️ Ethik & Grenzen</h2>
+                                        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                                            <h3 className="font-bold text-yellow-800 mb-2">Wichtige Fragen:</h3>
+                                            <ul className="space-y-1 text-gray-700 text-sm">
+                                                <li>⚠️ <strong>Bias:</strong> KI kann Vorurteile aus Trainingsdaten übernehmen</li>
+                                                <li>🔒 <strong>Datenschutz:</strong> Welche Daten werden genutzt?</li>
+                                                <li>💼 <strong>Arbeitsplätze:</strong> Automatisierung vs. neue Jobs</li>
+                                                <li>🎯 <strong>Verantwortung:</strong> Wer haftet bei KI-Fehlern?</li>
+                                                <li>🤖 <strong>Grenzen:</strong> KI kann nicht wirklich "denken" oder "verstehen"</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Einfaches ML-Modell</h2>
+                                        <div className="bg-teal-50 rounded-lg p-6">
+                                            <h3 className="font-bold mb-3">Vorhersage: Lernstunden → Note</h3>
+                                            <p className="text-sm text-gray-600 mb-4">
+                                                Dieses vereinfachte Modell lernt den Zusammenhang zwischen Lernzeit und Note.
+                                            </p>
+
+                                            <div className="bg-white rounded-lg p-4 mb-4">
+                                                <h4 className="font-semibold mb-2">Trainingsdaten:</h4>
+                                                <div className="grid grid-cols-4 gap-2">
+                                                    {trainingData.map((d, i) => (
+                                                        <div key={i} className="bg-teal-100 p-2 rounded text-center">
+                                                            <p className="text-xs text-gray-600">Stunden: {d.hours}</p>
+                                                            <p className="font-bold">Note: {d.grade}%</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="mb-4">
+                                                <label className="block font-semibold mb-2">
+                                                    Wie viele Stunden lernst du? {predictHours}h
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="8"
+                                                    value={predictHours}
+                                                    onChange={(e) => setPredictHours(parseInt(e.target.value))}
+                                                    className="w-full"
+                                                />
+                                                <div className="flex justify-between text-xs text-gray-600 mt-1">
+                                                    <span>0h</span>
+                                                    <span>4h</span>
+                                                    <span>8h</span>
+                                                </div>
+                                            </div>
+
+                                            <button 
+                                                onClick={predictGrade}
+                                                className="w-full bg-teal-500 text-white py-3 rounded-lg hover:bg-teal-600 font-semibold mb-4"
+                                            >
+                                                🤖 Note vorhersagen
+                                            </button>
+
+                                            {prediction !== null && (
+                                                <div className="bg-green-100 border-2 border-green-500 rounded-lg p-4">
+                                                    <h3 className="font-bold text-green-800 mb-2">KI-Vorhersage:</h3>
+                                                    <p className="text-3xl font-bold text-center text-green-800">
+                                                        {prediction}% Note
+                                                    </p>
+                                                    <p className="text-sm text-gray-700 mt-2 text-center">
+                                                        Bei {predictHours} Stunden Lernzeit
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            <div className="bg-blue-100 border-2 border-blue-500 rounded-lg p-3 mt-4">
+                                                <p className="text-sm text-blue-800">
+                                                    <strong>💡 So funktioniert's:</strong> Das Modell hat aus den Trainingsdaten gelernt, 
+                                                    dass mehr Lernzeit zu besseren Noten führt. Es nutzt lineare Regression für die Vorhersage.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎯 Bilderkennung Demo</h2>
+                                        <div className="bg-purple-50 rounded-lg p-6">
+                                            <p className="text-gray-700 mb-4">
+                                                Moderne KI kann Objekte in Bildern erkennen. Ein neuronales Netz wird mit 
+                                                Millionen Bildern trainiert.
+                                            </p>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {['🐱 Katze', '🐶 Hund', '🚗 Auto', '🏠 Haus', '🌳 Baum', '👤 Person'].map((item, i) => (
+                                                    <div key={i} className="bg-white border-2 border-purple-300 rounded-lg p-4 text-center hover:bg-purple-100 cursor-pointer transition">
+                                                        <p className="text-2xl mb-2">{item.split(' ')[0]}</p>
+                                                        <p className="text-sm font-semibold">{item.split(' ')[1]}</p>
+                                                        <p className="text-xs text-gray-600 mt-1">Erkannt: {85 + Math.floor(Math.random() * 15)}%</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span>{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-teal-500 text-white rounded-lg font-bold hover:bg-teal-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du bist ein KI-Experte!' :
+                                                 score >= 3 ? '👍 Gut gemacht!' :
+                                                 score >= 2 ? '📚 Nicht schlecht, aber übe noch!' :
+                                                 '💪 Lies die Theorie nochmal und versuche es erneut!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-teal-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<KIApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

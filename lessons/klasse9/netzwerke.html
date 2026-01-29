@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netzwerke - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-sky-500 to-blue-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function NetzwerkeApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            
+            const [ipAddress, setIpAddress] = useState('192.168.1.1');
+            const [pingResult, setPingResult] = useState('');
+            const [isPinging, setIsPinging] = useState(false);
+            const [dnsQuery, setDnsQuery] = useState('google.com');
+            const [dnsResult, setDnsResult] = useState('');
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was ist eine IP-Adresse?",
+                    options: ["Eine E-Mail-Adresse", "Eine eindeutige Netzwerkadresse", "Ein Passwort", "Eine Website-URL"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Was macht DNS?",
+                    options: ["Verschlüsselt Daten", "Übersetzt Domain-Namen in IP-Adressen", "Speichert Passwörter", "Lädt Webseiten herunter"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Was ist HTTP?",
+                    options: ["Ein Protokoll für Webseiten", "Eine Programmiersprache", "Ein Betriebssystem", "Eine Datenbank"],
+                    correct: 0
+                },
+                {
+                    id: 4,
+                    question: "Welche IP-Adresse ist gültig?",
+                    options: ["999.999.999.999", "192.168.1.1", "123.456.789.0", "12.34"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k9-05';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const simulatePing = () => {
+                setIsPinging(true);
+                setPingResult('Pinging ' + ipAddress + '...\n');
+                
+                setTimeout(() => {
+                    const times = [23, 24, 22, 25];
+                    let result = 'Pinging ' + ipAddress + '...\n\n';
+                    times.forEach((time, i) => {
+                        result += `Reply from ${ipAddress}: bytes=32 time=${time}ms TTL=64\n`;
+                    });
+                    result += `\nPing statistics:\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)\n`;
+                    result += `Average = ${(times.reduce((a,b)=>a+b)/times.length).toFixed(0)}ms`;
+                    setPingResult(result);
+                    setIsPinging(false);
+                }, 2000);
+            };
+
+            const simulateDNS = () => {
+                const dnsMap = {
+                    'google.com': '142.250.185.46',
+                    'facebook.com': '157.240.241.35',
+                    'youtube.com': '142.250.185.110',
+                    'wikipedia.org': '208.80.154.224'
+                };
+                const ip = dnsMap[dnsQuery.toLowerCase()] || '93.184.216.34';
+                setDnsResult(`DNS Lookup für "${dnsQuery}":\n\nIP-Adresse: ${ip}\nTyp: A (IPv4)\nTTL: 300 seconds`);
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">🌐</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Netzwerke</h1>
+                                    <p className="text-gray-600">Klasse 9 - IP, DNS, Protokolle</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🌐 Was ist ein Netzwerk?</h2>
+                                        <div className="bg-sky-50 border-l-4 border-sky-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Ein <strong>Netzwerk</strong> verbindet Computer und andere Geräte miteinander, 
+                                                damit sie Daten austauschen können. Das Internet ist das größte Netzwerk der Welt!
+                                            </p>
+                                        </div>
+                                        <div className="bg-blue-50 rounded-lg p-4">
+                                            <h3 className="font-bold mb-2">Netzwerktypen:</h3>
+                                            <ul className="space-y-1 text-gray-700">
+                                                <li>🏠 <strong>LAN:</strong> Local Area Network (z.B. dein Heimnetzwerk)</li>
+                                                <li>🏢 <strong>WAN:</strong> Wide Area Network (über große Entfernungen)</li>
+                                                <li>🌍 <strong>Internet:</strong> Weltweites Netzwerk von Netzwerken</li>
+                                                <li>📱 <strong>WLAN:</strong> Wireless LAN (kabelloses Netzwerk)</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🏷️ IP-Adressen</h2>
+                                        <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 mb-4">
+                                            <h3 className="font-bold text-green-800 mb-2">Die Adresse im Netzwerk</h3>
+                                            <p className="text-gray-700 mb-3">
+                                                Jedes Gerät im Netzwerk hat eine <strong>IP-Adresse</strong> (Internet Protocol Address). 
+                                                Sie funktioniert wie eine Postanschrift.
+                                            </p>
+                                            <div className="bg-white rounded-lg p-3 mb-3">
+                                                <h4 className="font-semibold mb-2">IPv4-Adresse:</h4>
+                                                <p className="font-mono text-lg">192.168.1.1</p>
+                                                <p className="text-sm text-gray-600 mt-1">4 Zahlen (0-255) getrennt durch Punkte</p>
+                                            </div>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <h4 className="font-semibold mb-2">IPv6-Adresse (neuer):</h4>
+                                                <p className="font-mono text-sm">2001:0db8:85a3:0000:0000:8a2e:0370:7334</p>
+                                                <p className="text-sm text-gray-600 mt-1">Hexadezimal, viel mehr Adressen möglich</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔤 DNS - Domain Name System</h2>
+                                        <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 mb-4">
+                                            <h3 className="font-bold text-purple-800 mb-2">Das Telefonbuch des Internets</h3>
+                                            <p className="text-gray-700 mb-3">
+                                                <strong>DNS</strong> übersetzt lesbare Domain-Namen (wie google.com) in IP-Adressen.
+                                                Menschen merken sich Namen besser als Zahlen!
+                                            </p>
+                                            <div className="bg-white rounded-lg p-3">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="font-semibold">google.com</span>
+                                                    <span className="text-2xl">➡️</span>
+                                                    <span className="font-mono">142.250.185.46</span>
+                                                </div>
+                                                <p className="text-sm text-gray-600">DNS-Server machen diese Übersetzung automatisch</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📡 Protokolle</h2>
+                                        <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4 mb-4">
+                                            <h3 className="font-bold text-orange-800 mb-2">Die Regeln der Kommunikation</h3>
+                                            <p className="text-gray-700 mb-3">
+                                                <strong>Protokolle</strong> sind Regeln, nach denen Daten im Netzwerk übertragen werden.
+                                            </p>
+                                            <div className="space-y-2">
+                                                <div className="bg-white rounded-lg p-3">
+                                                    <h4 className="font-bold text-blue-800">HTTP/HTTPS</h4>
+                                                    <p className="text-sm text-gray-600">Für Webseiten (S = Secure = verschlüsselt)</p>
+                                                </div>
+                                                <div className="bg-white rounded-lg p-3">
+                                                    <h4 className="font-bold text-green-800">TCP/IP</h4>
+                                                    <p className="text-sm text-gray-600">Grundprotokoll des Internets, zuverlässige Datenübertragung</p>
+                                                </div>
+                                                <div className="bg-white rounded-lg p-3">
+                                                    <h4 className="font-bold text-purple-800">UDP</h4>
+                                                    <p className="text-sm text-gray-600">Schneller als TCP, für Streaming und Gaming</p>
+                                                </div>
+                                                <div className="bg-white rounded-lg p-3">
+                                                    <h4 className="font-bold text-pink-800">FTP</h4>
+                                                    <p className="text-sm text-gray-600">File Transfer Protocol - zum Dateien übertragen</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔌 OSI-Modell (vereinfacht)</h2>
+                                        <div className="bg-gray-100 rounded-lg p-4">
+                                            <p className="text-gray-700 mb-3">Netzwerkkommunikation in Schichten:</p>
+                                            <div className="space-y-1 text-sm">
+                                                <div className="bg-red-100 p-2 rounded">7. Anwendung (HTTP, FTP)</div>
+                                                <div className="bg-orange-100 p-2 rounded">6. Darstellung (Verschlüsselung)</div>
+                                                <div className="bg-yellow-100 p-2 rounded">5. Sitzung (Verbindung)</div>
+                                                <div className="bg-green-100 p-2 rounded">4. Transport (TCP, UDP)</div>
+                                                <div className="bg-blue-100 p-2 rounded">3. Netzwerk (IP, Router)</div>
+                                                <div className="bg-indigo-100 p-2 rounded">2. Sicherung (MAC, Switch)</div>
+                                                <div className="bg-purple-100 p-2 rounded">1. Physikalisch (Kabel, Signale)</div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🏓 Ping Simulator</h2>
+                                        <div className="bg-sky-50 rounded-lg p-6">
+                                            <div className="mb-4">
+                                                <label className="block font-semibold mb-2">IP-Adresse oder Domain:</label>
+                                                <div className="flex gap-3">
+                                                    <input
+                                                        type="text"
+                                                        value={ipAddress}
+                                                        onChange={(e) => setIpAddress(e.target.value)}
+                                                        placeholder="192.168.1.1"
+                                                        className="flex-1 p-3 border-2 border-gray-300 rounded-lg"
+                                                        disabled={isPinging}
+                                                    />
+                                                    <button 
+                                                        onClick={simulatePing}
+                                                        disabled={isPinging}
+                                                        className={`px-6 py-3 rounded-lg font-semibold ${isPinging ? 'bg-gray-400 cursor-not-allowed' : 'bg-sky-500 hover:bg-sky-600'} text-white`}
+                                                    >
+                                                        {isPinging ? '⏳ Pinging...' : '🏓 Ping'}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {pingResult && (
+                                                <div className="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-sm whitespace-pre">
+                                                    {pingResult}
+                                                </div>
+                                            )}
+
+                                            <div className="bg-blue-100 border-2 border-blue-500 rounded-lg p-3 mt-4">
+                                                <p className="text-sm text-blue-800">
+                                                    <strong>💡 Was ist Ping?</strong> Ping sendet ein Signal an ein Gerät und misst, 
+                                                    wie lange die Antwort braucht. Damit kann man testen, ob ein Server erreichbar ist.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔍 DNS Lookup</h2>
+                                        <div className="bg-purple-50 rounded-lg p-6">
+                                            <div className="mb-4">
+                                                <label className="block font-semibold mb-2">Domain-Name:</label>
+                                                <div className="flex gap-3">
+                                                    <input
+                                                        type="text"
+                                                        value={dnsQuery}
+                                                        onChange={(e) => setDnsQuery(e.target.value)}
+                                                        placeholder="google.com"
+                                                        className="flex-1 p-3 border-2 border-gray-300 rounded-lg"
+                                                    />
+                                                    <button
+                                                        onClick={simulateDNS}
+                                                        className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 font-semibold"
+                                                    >
+                                                        🔍 Lookup
+                                                    </button>
+                                                </div>
+                                                <div className="mt-2 space-y-1 text-xs text-gray-600">
+                                                    <p>💡 Versuche: google.com, facebook.com, youtube.com, wikipedia.org</p>
+                                                </div>
+                                            </div>
+
+                                            {dnsResult && (
+                                                <div className="bg-white border-2 border-purple-300 rounded-lg p-4 font-mono text-sm whitespace-pre">
+                                                    {dnsResult}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🗺️ Netzwerk-Topologie</h2>
+                                        <div className="bg-green-50 rounded-lg p-6">
+                                            <div className="bg-white rounded-lg p-6">
+                                                <svg width="100%" height="300" viewBox="0 0 600 300">
+                                                    {/* Router in der Mitte */}
+                                                    <rect x="275" y="125" width="50" height="50" fill="#3b82f6" stroke="#1e40af" strokeWidth="2" rx="5"/>
+                                                    <text x="300" y="155" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">Router</text>
+                                                    
+                                                    {/* Computer 1 */}
+                                                    <circle cx="150" cy="50" r="30" fill="#10b981" stroke="#059669" strokeWidth="2"/>
+                                                    <text x="150" y="55" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">PC 1</text>
+                                                    <line x1="180" y1="60" x2="275" y2="135" stroke="#94a3b8" strokeWidth="2"/>
+                                                    
+                                                    {/* Computer 2 */}
+                                                    <circle cx="450" cy="50" r="30" fill="#10b981" stroke="#059669" strokeWidth="2"/>
+                                                    <text x="450" y="55" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">PC 2</text>
+                                                    <line x1="420" y1="60" x2="325" y2="135" stroke="#94a3b8" strokeWidth="2"/>
+                                                    
+                                                    {/* Smartphone */}
+                                                    <circle cx="150" cy="250" r="30" fill="#f59e0b" stroke="#d97706" strokeWidth="2"/>
+                                                    <text x="150" y="255" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">Phone</text>
+                                                    <line x1="180" y1="240" x2="275" y2="165" stroke="#94a3b8" strokeWidth="2"/>
+                                                    
+                                                    {/* Server */}
+                                                    <rect x="420" y="220" width="60" height="60" fill="#8b5cf6" stroke="#7c3aed" strokeWidth="2" rx="5"/>
+                                                    <text x="450" y="255" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">Server</text>
+                                                    <line x1="420" y1="240" x2="325" y2="160" stroke="#94a3b8" strokeWidth="2"/>
+                                                </svg>
+                                                
+                                                <p className="text-center text-sm text-gray-600 mt-2">
+                                                    Typisches Heimnetzwerk: Router verbindet alle Geräte
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span>{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-sky-500 text-white rounded-lg font-bold hover:bg-sky-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du bist ein Netzwerk-Experte!' :
+                                                 score >= 3 ? '👍 Gut gemacht!' :
+                                                 score >= 2 ? '📚 Nicht schlecht, aber übe noch!' :
+                                                 '💪 Lies die Theorie nochmal und versuche es erneut!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-sky-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<NetzwerkeApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijkstra Algorithmus - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-emerald-500 to-green-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function DijkstraApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            
+            const [graph] = useState({
+                nodes: ['A', 'B', 'C', 'D', 'E'],
+                edges: [
+                    { from: 'A', to: 'B', weight: 4 },
+                    { from: 'A', to: 'C', weight: 2 },
+                    { from: 'B', to: 'C', weight: 1 },
+                    { from: 'B', to: 'D', weight: 5 },
+                    { from: 'C', to: 'D', weight: 8 },
+                    { from: 'C', to: 'E', weight: 10 },
+                    { from: 'D', to: 'E', weight: 2 }
+                ]
+            });
+            const [startNode, setStartNode] = useState('A');
+            const [endNode, setEndNode] = useState('E');
+            const [distances, setDistances] = useState({});
+            const [visited, setVisited] = useState([]);
+            const [currentNode, setCurrentNode] = useState('');
+            const [path, setPath] = useState([]);
+            const [isRunning, setIsRunning] = useState(false);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was findet der Dijkstra-Algorithmus?",
+                    options: ["Den längsten Weg", "Den kürzesten Weg", "Alle möglichen Wege", "Einen zufälligen Weg"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Womit arbeitet der Dijkstra-Algorithmus?",
+                    options: ["Mit Bäumen", "Mit Listen", "Mit Graphen", "Mit Arrays"],
+                    correct: 2
+                },
+                {
+                    id: 3,
+                    question: "Was bedeuten die Zahlen an den Kanten?",
+                    options: ["Kosten/Gewichte", "Anzahl der Knoten", "Geschwindigkeit", "Nichts"],
+                    correct: 0
+                },
+                {
+                    id: 4,
+                    question: "Welchen Knoten wählt Dijkstra als nächstes?",
+                    options: ["Den ersten", "Den letzten", "Den mit der kleinsten Distanz", "Einen zufälligen"],
+                    correct: 2
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k9-02';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const runDijkstra = async () => {
+                setIsRunning(true);
+                setVisited([]);
+                setPath([]);
+                
+                const dist = {};
+                const prev = {};
+                const unvisited = new Set(graph.nodes);
+                
+                graph.nodes.forEach(node => {
+                    dist[node] = node === startNode ? 0 : Infinity;
+                    prev[node] = null;
+                });
+                
+                setDistances({...dist});
+                
+                while (unvisited.size > 0) {
+                    let current = null;
+                    let minDist = Infinity;
+                    
+                    unvisited.forEach(node => {
+                        if (dist[node] < minDist) {
+                            minDist = dist[node];
+                            current = node;
+                        }
+                    });
+                    
+                    if (current === null || dist[current] === Infinity) break;
+                    
+                    setCurrentNode(current);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    unvisited.delete(current);
+                    setVisited(prev => [...prev, current]);
+                    
+                    graph.edges.forEach(edge => {
+                        if (edge.from === current && unvisited.has(edge.to)) {
+                            const alt = dist[current] + edge.weight;
+                            if (alt < dist[edge.to]) {
+                                dist[edge.to] = alt;
+                                prev[edge.to] = current;
+                                setDistances({...dist});
+                            }
+                        }
+                    });
+                    
+                    if (current === endNode) break;
+                }
+                
+                const finalPath = [];
+                let curr = endNode;
+                while (curr !== null) {
+                    finalPath.unshift(curr);
+                    curr = prev[curr];
+                }
+                setPath(finalPath);
+                setIsRunning(false);
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">🗺️</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Dijkstra Algorithmus</h1>
+                                    <p className="text-gray-600">Klasse 9 - Kürzeste Wege in Graphen</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🗺️ Was ist der Dijkstra-Algorithmus?</h2>
+                                        <div className="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Der <strong>Dijkstra-Algorithmus</strong> findet den <strong>kürzesten Weg</strong> von einem Startknoten 
+                                                zu allen anderen Knoten in einem Graphen. Benannt nach dem niederländischen Informatiker Edsger Dijkstra (1959).
+                                            </p>
+                                        </div>
+                                        <div className="bg-blue-50 rounded-lg p-4">
+                                            <h3 className="font-bold mb-2">Anwendungen im Alltag:</h3>
+                                            <ul className="space-y-1 text-gray-700">
+                                                <li>🚗 Navigationssysteme (Google Maps, Navi)</li>
+                                                <li>📡 Routing in Netzwerken</li>
+                                                <li>✈️ Flugverbindungen optimieren</li>
+                                                <li>🎮 Wegfindung in Spielen</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Was ist ein Graph?</h2>
+                                        <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 mb-4">
+                                            <p className="text-gray-700 mb-3">
+                                                Ein <strong>Graph</strong> besteht aus <strong>Knoten</strong> (Punkten) und <strong>Kanten</strong> (Verbindungen).
+                                                Die Kanten haben <strong>Gewichte</strong> (Kosten/Distanzen).
+                                            </p>
+                                            <div className="bg-white rounded-lg p-4">
+                                                <p className="text-sm text-gray-600 mb-2"><strong>Beispiel: Städte-Netzwerk</strong></p>
+                                                <ul className="text-sm space-y-1">
+                                                    <li>🔵 <strong>Knoten:</strong> Städte (Berlin, Hamburg, München)</li>
+                                                    <li>➡️ <strong>Kanten:</strong> Straßen zwischen Städten</li>
+                                                    <li>🔢 <strong>Gewichte:</strong> Entfernung in km</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">⚙️ Wie funktioniert der Algorithmus?</h2>
+                                        <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 mb-4">
+                                            <h3 className="font-bold text-green-800 mb-2">Schritt-für-Schritt:</h3>
+                                            <ol className="space-y-2 text-gray-700 list-decimal list-inside">
+                                                <li><strong>Initialisierung:</strong> Startknoten hat Distanz 0, alle anderen Distanz ∞</li>
+                                                <li><strong>Knoten wählen:</strong> Wähle unbesuchten Knoten mit kleinster Distanz</li>
+                                                <li><strong>Nachbarn aktualisieren:</strong> Berechne Distanzen zu allen Nachbarn</li>
+                                                <li><strong>Als besucht markieren:</strong> Knoten ist fertig bearbeitet</li>
+                                                <li><strong>Wiederholen:</strong> Solange es unbesuchte Knoten gibt</li>
+                                            </ol>
+                                        </div>
+                                        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-3">
+                                            <p className="text-sm"><strong>Zeitkomplexität:</strong> O((V + E) log V) mit Prioritätswarteschlange</p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📝 Beispiel</h2>
+                                        <div className="bg-gray-100 rounded-lg p-4">
+                                            <p className="font-bold mb-2">Weg von A nach E finden:</p>
+                                            <div className="space-y-1 text-sm text-gray-700">
+                                                <p>1. Start bei A (Distanz: 0)</p>
+                                                <p>2. Besuche C (A→C = 2)</p>
+                                                <p>3. Besuche B (A→B = 4)</p>
+                                                <p>4. Besuche D (A→C→B→D = 8)</p>
+                                                <p>5. Besuche E (A→C→B→D→E = 10)</p>
+                                                <p className="font-bold mt-2">✓ Kürzester Weg: A → C → B → D → E (Länge: 10)</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💡 Wichtige Eigenschaften</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-green-800 mb-1">✅ Garantiert optimal</h3>
+                                                <p className="text-sm text-gray-600">Findet immer den kürzesten Weg</p>
+                                            </div>
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-blue-800 mb-1">⚠️ Nur positive Gewichte</h3>
+                                                <p className="text-sm text-gray-600">Funktioniert nicht mit negativen Kanten</p>
+                                            </div>
+                                            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-purple-800 mb-1">🎯 Gierig (Greedy)</h3>
+                                                <p className="text-sm text-gray-600">Wählt immer den nächsten besten Knoten</p>
+                                            </div>
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-3">
+                                                <h3 className="font-bold text-orange-800 mb-1">⚡ Effizient</h3>
+                                                <p className="text-sm text-gray-600">Schnell auch bei großen Graphen</p>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎮 Dijkstra Visualisierung</h2>
+                                        <div className="bg-emerald-50 rounded-lg p-6">
+                                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                                <div>
+                                                    <label className="block font-semibold mb-2">Startknoten:</label>
+                                                    <select
+                                                        value={startNode}
+                                                        onChange={(e) => setStartNode(e.target.value)}
+                                                        className="w-full p-2 border-2 border-gray-300 rounded"
+                                                        disabled={isRunning}
+                                                    >
+                                                        {graph.nodes.map(node => (
+                                                            <option key={node} value={node}>{node}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block font-semibold mb-2">Zielknoten:</label>
+                                                    <select
+                                                        value={endNode}
+                                                        onChange={(e) => setEndNode(e.target.value)}
+                                                        className="w-full p-2 border-2 border-gray-300 rounded"
+                                                        disabled={isRunning}
+                                                    >
+                                                        {graph.nodes.map(node => (
+                                                            <option key={node} value={node}>{node}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-white rounded-lg p-6 mb-4">
+                                                <svg width="100%" height="300" viewBox="0 0 500 300">
+                                                    {/* Kanten */}
+                                                    <line x1="50" y1="150" x2="150" y2="80" stroke="#94a3b8" strokeWidth="2" />
+                                                    <text x="90" y="105" fill="#64748b" fontSize="14" fontWeight="bold">4</text>
+                                                    
+                                                    <line x1="50" y1="150" x2="150" y2="220" stroke="#94a3b8" strokeWidth="2" />
+                                                    <text x="90" y="195" fill="#64748b" fontSize="14" fontWeight="bold">2</text>
+                                                    
+                                                    <line x1="150" y1="80" x2="150" y2="220" stroke="#94a3b8" strokeWidth="2" />
+                                                    <text x="165" y="155" fill="#64748b" fontSize="14" fontWeight="bold">1</text>
+                                                    
+                                                    <line x1="150" y1="80" x2="350" y2="80" stroke="#94a3b8" strokeWidth="2" />
+                                                    <text x="240" y="70" fill="#64748b" fontSize="14" fontWeight="bold">5</text>
+                                                    
+                                                    <line x1="150" y1="220" x2="350" y2="80" stroke="#94a3b8" strokeWidth="2" />
+                                                    <text x="235" y="165" fill="#64748b" fontSize="14" fontWeight="bold">8</text>
+                                                    
+                                                    <line x1="150" y1="220" x2="450" y2="150" stroke="#94a3b8" strokeWidth="2" />
+                                                    <text x="280" y="195" fill="#64748b" fontSize="14" fontWeight="bold">10</text>
+                                                    
+                                                    <line x1="350" y1="80" x2="450" y2="150" stroke="#94a3b8" strokeWidth="2" />
+                                                    <text x="390" y="105" fill="#64748b" fontSize="14" fontWeight="bold">2</text>
+                                                    
+                                                    {/* Pfad hervorheben */}
+                                                    {path.length > 1 && (
+                                                        <>
+                                                            {path.includes('A') && path.includes('C') && (
+                                                                <line x1="50" y1="150" x2="150" y2="220" stroke="#10b981" strokeWidth="4" />
+                                                            )}
+                                                            {path.includes('C') && path.includes('B') && (
+                                                                <line x1="150" y1="220" x2="150" y2="80" stroke="#10b981" strokeWidth="4" />
+                                                            )}
+                                                            {path.includes('B') && path.includes('D') && (
+                                                                <line x1="150" y1="80" x2="350" y2="80" stroke="#10b981" strokeWidth="4" />
+                                                            )}
+                                                            {path.includes('D') && path.includes('E') && (
+                                                                <line x1="350" y1="80" x2="450" y2="150" stroke="#10b981" strokeWidth="4" />
+                                                            )}
+                                                        </>
+                                                    )}
+                                                    
+                                                    {/* Knoten */}
+                                                    {graph.nodes.map((node, i) => {
+                                                        const positions = {A: [50, 150], B: [150, 80], C: [150, 220], D: [350, 80], E: [450, 150]};
+                                                        const [x, y] = positions[node];
+                                                        const isVisited = visited.includes(node);
+                                                        const isCurrent = currentNode === node;
+                                                        const isInPath = path.includes(node);
+                                                        
+                                                        return (
+                                                            <g key={node}>
+                                                                <circle 
+                                                                    cx={x} cy={y} r="25" 
+                                                                    fill={isCurrent ? '#fbbf24' : isInPath ? '#10b981' : isVisited ? '#cbd5e1' : '#3b82f6'}
+                                                                    stroke="#1e293b" strokeWidth="3"
+                                                                />
+                                                                <text x={x} y={y - 5} textAnchor="middle" fill="white" fontSize="20" fontWeight="bold">{node}</text>
+                                                                <text x={x} y={y + 10} textAnchor="middle" fill="white" fontSize="12">
+                                                                    {distances[node] !== undefined && distances[node] !== Infinity ? distances[node] : '∞'}
+                                                                </text>
+                                                            </g>
+                                                        );
+                                                    })}
+                                                </svg>
+                                                
+                                                <div className="mt-4 flex gap-4 text-sm">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+                                                        <span>Unbesucht</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 rounded-full bg-yellow-400"></div>
+                                                        <span>Aktuell</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 rounded-full bg-gray-300"></div>
+                                                        <span>Besucht</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                                                        <span>Pfad</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <button 
+                                                onClick={runDijkstra}
+                                                disabled={isRunning}
+                                                className={`w-full py-3 rounded-lg font-semibold ${isRunning ? 'bg-gray-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600'} text-white`}
+                                            >
+                                                {isRunning ? '⏳ Läuft...' : '▶ Dijkstra starten'}
+                                            </button>
+
+                                            {path.length > 0 && (
+                                                <div className="bg-green-100 border-2 border-green-500 rounded-lg p-4 mt-4">
+                                                    <h3 className="font-bold text-green-800 mb-2">✓ Kürzester Weg gefunden!</h3>
+                                                    <p className="text-lg">{path.join(' → ')}</p>
+                                                    <p className="text-sm text-gray-700 mt-1">
+                                                        Gesamtdistanz: {distances[endNode]}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📖 Distanztabelle</h2>
+                                        <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-blue-200">
+                                                        <tr>
+                                                            <th className="p-2 border">Knoten</th>
+                                                            <th className="p-2 border">Distanz</th>
+                                                            <th className="p-2 border">Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {graph.nodes.map(node => (
+                                                            <tr key={node} className={visited.includes(node) ? 'bg-green-50' : 'bg-white'}>
+                                                                <td className="p-2 border font-bold">{node}</td>
+                                                                <td className="p-2 border">
+                                                                    {distances[node] !== undefined && distances[node] !== Infinity ? distances[node] : '∞'}
+                                                                </td>
+                                                                <td className="p-2 border">
+                                                                    {node === currentNode ? '🟡 Aktuell' : visited.includes(node) ? '✅ Besucht' : '⚪ Unbesucht'}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span>{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-emerald-500 text-white rounded-lg font-bold hover:bg-emerald-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du bist ein Dijkstra-Experte!' :
+                                                 score >= 3 ? '👍 Gut gemacht!' :
+                                                 score >= 2 ? '📚 Nicht schlecht, aber übe noch!' :
+                                                 '💪 Lies die Theorie nochmal und versuche es erneut!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-emerald-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<DijkstraApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

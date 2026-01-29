@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Grundlagen - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-green-500 to-emerald-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function PythonApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            const [code, setCode] = useState('print("Hallo Welt!")');
+            const [output, setOutput] = useState('');
+            const [name, setName] = useState('');
+            const [age, setAge] = useState('');
+            const [greeting, setGreeting] = useState('');
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Welcher Befehl gibt Text in Python aus?",
+                    options: ["echo()", "print()", "write()", "show()"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Wie speichert man eine Zahl in einer Variable?",
+                    options: ["x = 5", "var x = 5", "int x = 5", "x := 5"],
+                    correct: 0
+                },
+                {
+                    id: 3,
+                    question: "Was ist der richtige Datentyp für Text?",
+                    options: ["int", "float", "str", "text"],
+                    correct: 2
+                },
+                {
+                    id: 4,
+                    question: "Wie fragt man den Nutzer nach einer Eingabe?",
+                    options: ["get()", "input()", "read()", "ask()"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k7-02';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const runCode = () => {
+                try {
+                    if (code.includes('print(')) {
+                        const match = code.match(/print\((.*?)\)/);
+                        if (match) {
+                            let result = match[1].replace(/['"]/g, '');
+                            setOutput(result);
+                        }
+                    } else {
+                        setOutput('Nutze print() um etwas auszugeben!');
+                    }
+                } catch (e) {
+                    setOutput('Fehler: ' + e.message);
+                }
+            };
+
+            const generateGreeting = () => {
+                if (name && age) {
+                    setGreeting(`Hallo ${name}! Du bist ${age} Jahre alt.`);
+                }
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">🐍</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Python Grundlagen</h1>
+                                    <p className="text-gray-600">Klasse 7 - Erste Schritte in Python</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🐍 Was ist Python?</h2>
+                                        <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                <strong>Python</strong> ist eine beliebte Programmiersprache, die einfach zu lernen ist.
+                                                Sie wird für Webseiten, Apps, Datenanalyse und sogar künstliche Intelligenz verwendet!
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📝 Dein erstes Python-Programm</h2>
+                                        <div className="bg-gray-900 text-green-400 rounded-lg p-4 font-mono">
+                                            <code>print("Hallo Welt!")</code>
+                                        </div>
+                                        <p className="text-gray-600 mt-2">
+                                            Mit <code className="bg-gray-200 px-2 py-1 rounded">print()</code> kannst du Text ausgeben!
+                                        </p>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💾 Variablen in Python</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-blue-800 mb-2">Zahlen (int)</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">alter = 13</code>
+                                            </div>
+                                            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-purple-800 mb-2">Kommazahlen (float)</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">pi = 3.14</code>
+                                            </div>
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-orange-800 mb-2">Text (str)</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">name = "Anna"</code>
+                                            </div>
+                                            <div className="bg-pink-50 border-2 border-pink-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-pink-800 mb-2">Wahrheitswerte (bool)</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">ist_wahr = True</code>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🧮 Rechnen mit Python</h2>
+                                        <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-gray-900 text-green-400 p-2 rounded font-mono text-sm">5 + 3 → 8</div>
+                                                <div className="bg-gray-900 text-green-400 p-2 rounded font-mono text-sm">10 - 4 → 6</div>
+                                                <div className="bg-gray-900 text-green-400 p-2 rounded font-mono text-sm">6 * 7 → 42</div>
+                                                <div className="bg-gray-900 text-green-400 p-2 rounded font-mono text-sm">20 / 5 → 4</div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">⌨️ Eingabe vom Nutzer</h2>
+                                        <div className="bg-gray-900 text-green-400 rounded-lg p-4 font-mono">
+                                            <code>
+                                                name = input("Wie heißt du? ")<br/>
+                                                print("Hallo " + name + "!")
+                                            </code>
+                                        </div>
+                                        <p className="text-gray-600 mt-2">
+                                            Mit <code className="bg-gray-200 px-2 py-1 rounded">input()</code> kannst du den Nutzer etwas fragen!
+                                        </p>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💡 Kommentare</h2>
+                                        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                                            <div className="bg-gray-900 text-green-400 p-3 rounded font-mono">
+                                                <code>
+                                                    # Das ist ein Kommentar<br/>
+                                                    print("Hallo")  # Kommentare erklären den Code
+                                                </code>
+                                            </div>
+                                            <p className="text-sm text-gray-600 mt-2">
+                                                Kommentare beginnen mit <code>#</code> und werden nicht ausgeführt!
+                                            </p>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💻 Python Code-Editor</h2>
+                                        <div className="bg-gray-100 rounded-lg p-4">
+                                            <label className="block font-bold mb-2">Schreibe deinen Python-Code:</label>
+                                            <textarea
+                                                value={code}
+                                                onChange={(e) => setCode(e.target.value)}
+                                                className="w-full h-32 p-3 bg-gray-900 text-green-400 font-mono rounded border-2 border-gray-700"
+                                                placeholder="print('Hallo Welt!')"
+                                            />
+                                            <button 
+                                                onClick={runCode}
+                                                className="mt-3 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold"
+                                            >
+                                                ▶ Code ausführen
+                                            </button>
+                                            {output && (
+                                                <div className="mt-4 bg-white border-2 border-gray-300 rounded-lg p-3">
+                                                    <strong>Ausgabe:</strong>
+                                                    <div className="mt-2 font-mono">{output}</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">⌨️ Nutzer-Eingabe simulieren</h2>
+                                        <div className="bg-blue-50 rounded-lg p-6">
+                                            <div className="space-y-3 mb-4">
+                                                <div>
+                                                    <label className="block font-bold mb-2">Wie heißt du?</label>
+                                                    <input
+                                                        type="text"
+                                                        value={name}
+                                                        onChange={(e) => setName(e.target.value)}
+                                                        className="w-full p-2 border-2 border-gray-300 rounded"
+                                                        placeholder="Dein Name"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block font-bold mb-2">Wie alt bist du?</label>
+                                                    <input
+                                                        type="number"
+                                                        value={age}
+                                                        onChange={(e) => setAge(e.target.value)}
+                                                        className="w-full p-2 border-2 border-gray-300 rounded"
+                                                        placeholder="Dein Alter"
+                                                    />
+                                                </div>
+                                                <button 
+                                                    onClick={generateGreeting}
+                                                    className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 font-semibold"
+                                                >
+                                                    Begrüßung generieren
+                                                </button>
+                                            </div>
+                                            {greeting && (
+                                                <div className="bg-white border-2 border-blue-300 rounded-lg p-4">
+                                                    <strong>Ausgabe:</strong>
+                                                    <p className="mt-2 text-lg">{greeting}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🧮 Rechner</h2>
+                                        <div className="bg-purple-50 rounded-lg p-6">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {[
+                                                    { op: '+', a: 15, b: 7, result: 22 },
+                                                    { op: '-', a: 20, b: 8, result: 12 },
+                                                    { op: '*', a: 6, b: 9, result: 54 },
+                                                    { op: '/', a: 36, b: 6, result: 6 }
+                                                ].map((calc, i) => (
+                                                    <div key={i} className="bg-white border-2 border-purple-300 rounded-lg p-4 text-center">
+                                                        <code className="text-lg font-bold">
+                                                            {calc.a} {calc.op} {calc.b} = {calc.result}
+                                                        </code>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📋 Beispiel-Programme</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                                                <h3 className="font-bold mb-2">Begrüßung</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded whitespace-pre">
+{`name = "Max"
+print("Hallo " + name)`}
+                                                </code>
+                                            </div>
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold mb-2">Alter berechnen</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded whitespace-pre">
+{`geburtsjahr = 2010
+alter = 2024 - geburtsjahr
+print(alter)`}
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="font-mono text-sm">{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du beherrschst Python-Grundlagen!' :
+                                                 score >= 3 ? '👍 Gut gemacht!' :
+                                                 score >= 2 ? '📚 Noch etwas üben!' :
+                                                 '💪 Lies die Theorie nochmal!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-green-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<PythonApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

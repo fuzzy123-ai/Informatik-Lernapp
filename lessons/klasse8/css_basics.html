@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Styling - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-pink-500 to-purple-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function CSSBasicsApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            
+            const [cssCode, setCssCode] = useState(`h1 {
+  color: blue;
+  font-size: 32px;
+  text-align: center;
+}
+
+p {
+  color: green;
+  font-family: Arial;
+}`);
+            
+            const [boxColor, setBoxColor] = useState('#3b82f6');
+            const [boxSize, setBoxSize] = useState(100);
+            const [boxBorder, setBoxBorder] = useState(2);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was bedeutet CSS?",
+                    options: ["Computer Style Sheets", "Cascading Style Sheets", "Creative Style System", "Colorful Site Styling"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Wie bindet man CSS in HTML ein?",
+                    options: ["Mit <css>", "Mit <style> im <head>", "Mit <design>", "Nur extern möglich"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Welche Eigenschaft ändert die Textfarbe?",
+                    options: ["text-color", "font-color", "color", "text-style"],
+                    correct: 2
+                },
+                {
+                    id: 4,
+                    question: "Was ist ein CSS-Selektor?",
+                    options: ["Eine Farbe", "Ein Element-Auswähler", "Eine Schriftart", "Ein Bild"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k8-04';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">🎨</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">CSS Styling</h1>
+                                    <p className="text-gray-600">Klasse 8 - Webseiten gestalten</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎨 Was ist CSS?</h2>
+                                        <div className="bg-pink-50 border-l-4 border-pink-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                <strong>CSS</strong> (Cascading Style Sheets) ist die Sprache zum <strong>Gestalten von Webseiten</strong>.
+                                                Während HTML die Struktur definiert, bestimmt CSS das Aussehen: Farben, Schriften, Größen und Layout.
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📝 CSS-Syntax</h2>
+                                        <div className="bg-gray-800 text-green-400 rounded-lg p-4 font-mono text-sm">
+                                            <pre>{\`selector {
+  eigenschaft: wert;
+  eigenschaft: wert;
+}\`}</pre>
+                                        </div>
+                                        <div className="mt-4 space-y-2">
+                                            <div className="bg-blue-50 border-l-4 border-blue-500 p-3">
+                                                <p className="text-sm"><strong>Selektor:</strong> Wählt das HTML-Element aus (z.B. h1, p, .klasse)</p>
+                                            </div>
+                                            <div className="bg-green-50 border-l-4 border-green-500 p-3">
+                                                <p className="text-sm"><strong>Eigenschaft:</strong> Was gestaltet werden soll (z.B. color, font-size)</p>
+                                            </div>
+                                            <div className="bg-purple-50 border-l-4 border-purple-500 p-3">
+                                                <p className="text-sm"><strong>Wert:</strong> Wie es gestaltet werden soll (z.B. blue, 16px)</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">�� Wichtige CSS-Eigenschaften</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-blue-800 mb-2">Farben</h3>
+                                                <code className="text-xs bg-white p-2 rounded block mb-1">color: red;</code>
+                                                <code className="text-xs bg-white p-2 rounded block">background-color: #FF0000;</code>
+                                            </div>
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">Text</h3>
+                                                <code className="text-xs bg-white p-2 rounded block mb-1">font-size: 16px;</code>
+                                                <code className="text-xs bg-white p-2 rounded block">font-family: Arial;</code>
+                                            </div>
+                                            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-purple-800 mb-2">Größe & Abstand</h3>
+                                                <code className="text-xs bg-white p-2 rounded block mb-1">width: 200px;</code>
+                                                <code className="text-xs bg-white p-2 rounded block">margin: 10px;</code>
+                                            </div>
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-orange-800 mb-2">Rahmen</h3>
+                                                <code className="text-xs bg-white p-2 rounded block mb-1">border: 2px solid black;</code>
+                                                <code className="text-xs bg-white p-2 rounded block">border-radius: 10px;</code>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔗 CSS einbinden</h2>
+                                        <div className="space-y-4">
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-blue-800 mb-2">1. Inline (direkt im Element)</h3>
+                                                <code className="text-xs bg-white p-2 rounded block">{\`<p style="color: red;">Text</p>\`}</code>
+                                            </div>
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">2. Intern (im &lt;head&gt;)</h3>
+                                                <code className="text-xs bg-white p-2 rounded block">{\`<style> p { color: red; } </style>\`}</code>
+                                            </div>
+                                            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-purple-800 mb-2">3. Extern (eigene Datei)</h3>
+                                                <code className="text-xs bg-white p-2 rounded block">{\`<link rel="stylesheet" href="style.css">\`}</code>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎯 CSS-Selektoren</h2>
+                                        <div className="bg-gray-100 rounded-lg p-4 space-y-2">
+                                            <div className="bg-white p-3 rounded">
+                                                <code className="text-sm font-bold">h1 { }</code>
+                                                <p className="text-xs text-gray-600 mt-1">Element-Selektor (alle h1-Tags)</p>
+                                            </div>
+                                            <div className="bg-white p-3 rounded">
+                                                <code className="text-sm font-bold">.klasse { }</code>
+                                                <p className="text-xs text-gray-600 mt-1">Klassen-Selektor (alle mit class="klasse")</p>
+                                            </div>
+                                            <div className="bg-white p-3 rounded">
+                                                <code className="text-sm font-bold">#id { }</code>
+                                                <p className="text-xs text-gray-600 mt-1">ID-Selektor (Element mit id="id")</p>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎨 CSS-Spielplatz</h2>
+                                        <div className="bg-pink-50 rounded-lg p-6">
+                                            <p className="mb-4 text-gray-700">Experimentiere mit CSS-Eigenschaften:</p>
+                                            
+                                            <div className="bg-white rounded-lg p-4 mb-4">
+                                                <div className="mb-4">
+                                                    <label className="block font-semibold mb-2">Farbe:</label>
+                                                    <input 
+                                                        type="color" 
+                                                        value={boxColor}
+                                                        onChange={(e) => setBoxColor(e.target.value)}
+                                                        className="w-full h-12 cursor-pointer"
+                                                    />
+                                                </div>
+                                                <div className="mb-4">
+                                                    <label className="block font-semibold mb-2">Größe: {boxSize}px</label>
+                                                    <input 
+                                                        type="range" 
+                                                        min="50" 
+                                                        max="300" 
+                                                        value={boxSize}
+                                                        onChange={(e) => setBoxSize(e.target.value)}
+                                                        className="w-full"
+                                                    />
+                                                </div>
+                                                <div className="mb-4">
+                                                    <label className="block font-semibold mb-2">Rahmendicke: {boxBorder}px</label>
+                                                    <input 
+                                                        type="range" 
+                                                        min="0" 
+                                                        max="20" 
+                                                        value={boxBorder}
+                                                        onChange={(e) => setBoxBorder(e.target.value)}
+                                                        className="w-full"
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex justify-center">
+                                                <div 
+                                                    style={{
+                                                        backgroundColor: boxColor,
+                                                        width: `${boxSize}px`,
+                                                        height: `${boxSize}px`,
+                                                        border: `${boxBorder}px solid black`,
+                                                        borderRadius: '10px',
+                                                        transition: 'all 0.3s'
+                                                    }}
+                                                />
+                                            </div>
+                                            
+                                            <div className="mt-4 bg-gray-800 text-green-400 rounded-lg p-3 font-mono text-sm">
+                                                <pre>{`.box {
+  background-color: ${boxColor};
+  width: ${boxSize}px;
+  height: ${boxSize}px;
+  border: ${boxBorder}px solid black;
+  border-radius: 10px;
+}`}</pre>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💻 CSS-Editor</h2>
+                                        <div className="bg-purple-50 rounded-lg p-6">
+                                            <p className="mb-4 text-gray-700">Schreibe dein eigenes CSS:</p>
+                                            <textarea
+                                                value={cssCode}
+                                                onChange={(e) => setCssCode(e.target.value)}
+                                                className="w-full h-48 p-3 border-2 border-gray-300 rounded-lg font-mono text-sm mb-4"
+                                            />
+                                            <div className="bg-white rounded-lg p-4 border-2 border-gray-300">
+                                                <style>{\cssCode}</style>
+                                                <h1>Das ist eine Überschrift</h1>
+                                                <p>Das ist ein Absatz mit Text.</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📚 CSS-Beispiele</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-blue-800 mb-2">Zentrierter Button</h3>
+                                                <div className="bg-white p-4 rounded mb-2">
+                                                    <button style={{
+                                                        backgroundColor: '#3b82f6',
+                                                        color: 'white',
+                                                        padding: '12px 24px',
+                                                        border: 'none',
+                                                        borderRadius: '8px',
+                                                        fontWeight: 'bold',
+                                                        cursor: 'pointer'
+                                                    }}>
+                                                        Klick mich!
+                                                    </button>
+                                                </div>
+                                                <code className="text-xs">background-color, padding, border-radius</code>
+                                            </div>
+                                            
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">Farbiger Text</h3>
+                                                <div className="bg-white p-4 rounded mb-2">
+                                                    <p style={{color: '#10b981', fontSize: '24px', fontWeight: 'bold'}}>
+                                                        Grüner Text
+                                                    </p>
+                                                </div>
+                                                <code className="text-xs">color, font-size, font-weight</code>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span>{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-pink-500 text-white rounded-lg font-bold hover:bg-pink-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du bist ein CSS-Experte!' :
+                                                 score >= 3 ? '👍 Gut gemacht!' :
+                                                 score >= 2 ? '📚 Nicht schlecht, aber übe noch!' :
+                                                 '💪 Lies die Theorie nochmal und versuche es erneut!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-pink-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<CSSBasicsApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

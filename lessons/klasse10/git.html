@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git und Versionskontrolle - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-amber-500 to-orange-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function GitApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            
+            const [commits, setCommits] = useState([
+                { id: 1, message: 'Initial commit', author: 'Du', time: '10:00' }
+            ]);
+            const [commitMessage, setCommitMessage] = useState('');
+            const [branches, setBranches] = useState(['main']);
+            const [currentBranch, setCurrentBranch] = useState('main');
+            const [newBranchName, setNewBranchName] = useState('');
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was ist Git?",
+                    options: ["Ein Texteditor", "Ein Versionskontrollsystem", "Eine Programmiersprache", "Ein Betriebssystem"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Was macht 'git commit'?",
+                    options: ["Löscht Dateien", "Speichert Änderungen im Repository", "Lädt Dateien herunter", "Erstellt eine Branch"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Was ist ein Branch?",
+                    options: ["Ein Fehler", "Eine Kopie des Codes zum parallelen Arbeiten", "Ein Ordner", "Ein Kommando"],
+                    correct: 1
+                },
+                {
+                    id: 4,
+                    question: "Was ist GitHub?",
+                    options: ["Eine Git-Software", "Eine Plattform zum Hosten von Git-Repositories", "Ein Betriebssystem", "Eine Datenbank"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k10-03';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const addCommit = () => {
+                if (commitMessage.trim()) {
+                    const now = new Date();
+                    const newCommit = {
+                        id: commits.length + 1,
+                        message: commitMessage,
+                        author: 'Du',
+                        time: now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0'),
+                        branch: currentBranch
+                    };
+                    setCommits([...commits, newCommit]);
+                    setCommitMessage('');
+                }
+            };
+
+            const createBranch = () => {
+                if (newBranchName.trim() && !branches.includes(newBranchName)) {
+                    setBranches([...branches, newBranchName]);
+                    setNewBranchName('');
+                }
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">🔀</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Git und Versionskontrolle</h1>
+                                    <p className="text-gray-600">Klasse 10 - Code-Verwaltung mit Git</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔀 Was ist Git?</h2>
+                                        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                <strong>Git</strong> ist ein Versionskontrollsystem, das Änderungen am Code verfolgt.
+                                                Es ermöglicht Teamarbeit, ohne dass Code verloren geht oder überschrieben wird.
+                                            </p>
+                                        </div>
+                                        <div className="bg-blue-50 rounded-lg p-4">
+                                            <h3 className="font-bold mb-2">Warum Git nutzen?</h3>
+                                            <ul className="space-y-1 text-gray-700">
+                                                <li>📜 <strong>Historie:</strong> Alle Änderungen sind gespeichert</li>
+                                                <li>👥 <strong>Zusammenarbeit:</strong> Mehrere Personen können gleichzeitig arbeiten</li>
+                                                <li>↩️ <strong>Rückgängig:</strong> Fehler können einfach zurückgenommen werden</li>
+                                                <li>🌿 <strong>Branches:</strong> Experimente ohne Risiko</li>
+                                                <li>☁️ <strong>Backup:</strong> Code ist sicher auf Servern gespeichert</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💾 Git-Grundlagen</h2>
+                                        <div className="space-y-3">
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">Repository (Repo)</h3>
+                                                <p className="text-sm text-gray-700">
+                                                    Ein <strong>Repository</strong> ist ein Projektordner mit Git-Versionskontrolle.
+                                                    Es enthält alle Dateien und die komplette Historie.
+                                                </p>
+                                            </div>
+
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-blue-800 mb-2">Commit</h3>
+                                                <p className="text-sm text-gray-700 mb-2">
+                                                    Ein <strong>Commit</strong> ist ein Snapshot (Schnappschuss) deines Codes zu einem bestimmten Zeitpunkt.
+                                                </p>
+                                                <div className="bg-white rounded p-2 font-mono text-xs">
+                                                    git commit -m "Feature hinzugefügt"
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-purple-800 mb-2">Branch</h3>
+                                                <p className="text-sm text-gray-700 mb-2">
+                                                    Ein <strong>Branch</strong> ist eine parallele Version des Codes. 
+                                                    Ideal zum Entwickeln neuer Features ohne den Hauptcode zu beeinflussen.
+                                                </p>
+                                                <div className="bg-white rounded p-2 font-mono text-xs">
+                                                    git branch feature-login
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-orange-800 mb-2">Merge</h3>
+                                                <p className="text-sm text-gray-700 mb-2">
+                                                    <strong>Merge</strong> vereint Änderungen von zwei Branches.
+                                                </p>
+                                                <div className="bg-white rounded p-2 font-mono text-xs">
+                                                    git merge feature-login
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">⚙️ Wichtige Git-Befehle</h2>
+                                        <div className="bg-gray-100 rounded-lg p-4">
+                                            <div className="space-y-2 font-mono text-sm">
+                                                <div className="bg-white p-2 rounded flex justify-between">
+                                                    <code>git init</code>
+                                                    <span className="text-gray-600">Neues Repository erstellen</span>
+                                                </div>
+                                                <div className="bg-white p-2 rounded flex justify-between">
+                                                    <code>git add .</code>
+                                                    <span className="text-gray-600">Änderungen bereitstellen</span>
+                                                </div>
+                                                <div className="bg-white p-2 rounded flex justify-between">
+                                                    <code>git commit -m "..."</code>
+                                                    <span className="text-gray-600">Änderungen speichern</span>
+                                                </div>
+                                                <div className="bg-white p-2 rounded flex justify-between">
+                                                    <code>git push</code>
+                                                    <span className="text-gray-600">Zum Server hochladen</span>
+                                                </div>
+                                                <div className="bg-white p-2 rounded flex justify-between">
+                                                    <code>git pull</code>
+                                                    <span className="text-gray-600">Vom Server herunterladen</span>
+                                                </div>
+                                                <div className="bg-white p-2 rounded flex justify-between">
+                                                    <code>git status</code>
+                                                    <span className="text-gray-600">Status anzeigen</span>
+                                                </div>
+                                                <div className="bg-white p-2 rounded flex justify-between">
+                                                    <code>git log</code>
+                                                    <span className="text-gray-600">Historie anzeigen</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🌐 GitHub, GitLab & Co.</h2>
+                                        <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                            <p className="text-gray-700 mb-3">
+                                                <strong>GitHub</strong>, <strong>GitLab</strong> und <strong>Bitbucket</strong> sind Plattformen 
+                                                zum Hosten von Git-Repositories in der Cloud.
+                                            </p>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                <div className="bg-white p-3 rounded">
+                                                    <h4 className="font-bold">GitHub</h4>
+                                                    <p className="text-xs text-gray-600">Größte Plattform, viele Open-Source Projekte</p>
+                                                </div>
+                                                <div className="bg-white p-3 rounded">
+                                                    <h4 className="font-bold">GitLab</h4>
+                                                    <p className="text-xs text-gray-600">Open Source, CI/CD integriert</p>
+                                                </div>
+                                                <div className="bg-white p-3 rounded">
+                                                    <h4 className="font-bold">Bitbucket</h4>
+                                                    <p className="text-xs text-gray-600">Von Atlassian, gut für Teams</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔄 Git-Workflow</h2>
+                                        <div className="bg-green-50 border-l-4 border-green-500 p-4">
+                                            <ol className="space-y-2 text-gray-700 list-decimal list-inside">
+                                                <li><strong>Clone/Pull:</strong> Aktuellen Code holen</li>
+                                                <li><strong>Branch:</strong> Neuen Branch für Feature erstellen</li>
+                                                <li><strong>Code:</strong> Änderungen programmieren</li>
+                                                <li><strong>Add + Commit:</strong> Änderungen speichern</li>
+                                                <li><strong>Push:</strong> Branch hochladen</li>
+                                                <li><strong>Pull Request:</strong> Review anfordern</li>
+                                                <li><strong>Merge:</strong> In Hauptbranch zusammenführen</li>
+                                            </ol>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💾 Commit Simulator</h2>
+                                        <div className="bg-amber-50 rounded-lg p-6">
+                                            <div className="mb-4">
+                                                <label className="block font-semibold mb-2">Aktueller Branch:</label>
+                                                <select
+                                                    value={currentBranch}
+                                                    onChange={(e) => setCurrentBranch(e.target.value)}
+                                                    className="w-full p-3 border-2 border-gray-300 rounded-lg"
+                                                >
+                                                    {branches.map(branch => (
+                                                        <option key={branch} value={branch}>{branch}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div className="mb-4">
+                                                <label className="block font-semibold mb-2">Commit Message:</label>
+                                                <div className="flex gap-3">
+                                                    <input
+                                                        type="text"
+                                                        value={commitMessage}
+                                                        onChange={(e) => setCommitMessage(e.target.value)}
+                                                        placeholder="Fix bug in login"
+                                                        className="flex-1 p-3 border-2 border-gray-300 rounded-lg"
+                                                        onKeyPress={(e) => e.key === 'Enter' && addCommit()}
+                                                    />
+                                                    <button
+                                                        onClick={addCommit}
+                                                        className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-semibold"
+                                                    >
+                                                        💾 Commit
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-white rounded-lg p-4 mb-4">
+                                                <h3 className="font-bold mb-3">Commit-Historie:</h3>
+                                                <div className="space-y-2">
+                                                    {commits.slice().reverse().map((commit) => (
+                                                        <div key={commit.id} className="bg-gray-50 border-l-4 border-green-500 p-3 rounded">
+                                                            <div className="flex justify-between items-start">
+                                                                <div>
+                                                                    <p className="font-semibold">{commit.message}</p>
+                                                                    <p className="text-xs text-gray-600">
+                                                                        {commit.author} • {commit.time} • {commit.branch || 'main'}
+                                                                    </p>
+                                                                </div>
+                                                                <span className="text-xs bg-green-100 px-2 py-1 rounded">#{commit.id}</span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🌿 Branch Visualizer</h2>
+                                        <div className="bg-green-50 rounded-lg p-6">
+                                            <div className="mb-4">
+                                                <label className="block font-semibold mb-2">Neuen Branch erstellen:</label>
+                                                <div className="flex gap-3">
+                                                    <input
+                                                        type="text"
+                                                        value={newBranchName}
+                                                        onChange={(e) => setNewBranchName(e.target.value)}
+                                                        placeholder="feature-neue-funktion"
+                                                        className="flex-1 p-3 border-2 border-gray-300 rounded-lg"
+                                                    />
+                                                    <button
+                                                        onClick={createBranch}
+                                                        className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold"
+                                                    >
+                                                        🌿 Branch
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-white rounded-lg p-4">
+                                                <h3 className="font-bold mb-3">Alle Branches:</h3>
+                                                <div className="space-y-2">
+                                                    {branches.map((branch, i) => (
+                                                        <div 
+                                                            key={i} 
+                                                            className={`p-3 rounded border-2 ${branch === currentBranch ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}
+                                                        >
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-2xl">🌿</span>
+                                                                    <span className="font-semibold">{branch}</span>
+                                                                    {branch === currentBranch && (
+                                                                        <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">AKTIV</span>
+                                                                    )}
+                                                                </div>
+                                                                {branch !== 'main' && (
+                                                                    <button className="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                                                                        Merge → main
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-blue-100 border-2 border-blue-500 rounded-lg p-3 mt-4">
+                                                <p className="text-sm text-blue-800">
+                                                    <strong>💡 Tipp:</strong> Erstelle für jedes neue Feature einen eigenen Branch. 
+                                                    So bleiben Änderungen getrennt und können einzeln getestet werden!
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Git-Statistik</h2>
+                                        <div className="bg-purple-50 rounded-lg p-6">
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div className="bg-white rounded-lg p-4 text-center">
+                                                    <p className="text-3xl font-bold text-purple-600">{commits.length}</p>
+                                                    <p className="text-sm text-gray-600">Commits</p>
+                                                </div>
+                                                <div className="bg-white rounded-lg p-4 text-center">
+                                                    <p className="text-3xl font-bold text-green-600">{branches.length}</p>
+                                                    <p className="text-sm text-gray-600">Branches</p>
+                                                </div>
+                                                <div className="bg-white rounded-lg p-4 text-center">
+                                                    <p className="text-3xl font-bold text-blue-600">1</p>
+                                                    <p className="text-sm text-gray-600">Contributor</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span>{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-amber-500 text-white rounded-lg font-bold hover:bg-amber-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du bist ein Git-Experte!' :
+                                                 score >= 3 ? '👍 Gut gemacht!' :
+                                                 score >= 2 ? '📚 Nicht schlecht, aber übe noch!' :
+                                                 '💪 Lies die Theorie nochmal und versuche es erneut!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-amber-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<GitApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

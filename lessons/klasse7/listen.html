@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listen und Arrays - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function ListenApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            const [shoppingList, setShoppingList] = useState(['Äpfel', 'Brot', 'Milch']);
+            const [newItem, setNewItem] = useState('');
+            const [numbers, setNumbers] = useState([5, 12, 3, 18, 7]);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was ist eine Liste in Python?",
+                    options: ["Eine einzelne Zahl", "Eine Sammlung von Werten", "Ein Text", "Eine Bedingung"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Wie erstellt man eine leere Liste?",
+                    options: ["liste = {}", "liste = []", "liste = ()", "liste = <>"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Bei welchem Index startet eine Liste in Python?",
+                    options: ["Bei 1", "Bei 0", "Bei -1", "Bei 10"],
+                    correct: 1
+                },
+                {
+                    id: 4,
+                    question: "Wie fügt man ein Element am Ende hinzu?",
+                    options: ["liste.add()", "liste.append()", "liste.insert()", "liste.push()"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k7-03';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const addItem = () => {
+                if (newItem.trim()) {
+                    setShoppingList([...shoppingList, newItem]);
+                    setNewItem('');
+                }
+            };
+
+            const removeItem = (index) => {
+                setShoppingList(shoppingList.filter((_, i) => i !== index));
+            };
+
+            const sortNumbers = () => {
+                setNumbers([...numbers].sort((a, b) => a - b));
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">📊</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Listen und Arrays</h1>
+                                    <p className="text-gray-600">Klasse 7 - Mehrere Werte speichern</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Was ist eine Liste?</h2>
+                                        <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Eine <strong>Liste</strong> (oder Array) ist eine Sammlung von mehreren Werten. 
+                                                Statt für jeden Wert eine eigene Variable zu haben, kannst du alle in einer Liste speichern!
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📝 Listen erstellen</h2>
+                                        <div className="bg-gray-900 text-green-400 rounded-lg p-4 font-mono mb-4">
+                                            <code>
+                                                # Einkaufsliste<br/>
+                                                einkauf = ["Äpfel", "Brot", "Milch"]<br/>
+                                                <br/>
+                                                # Zahlen<br/>
+                                                zahlen = [5, 10, 15, 20, 25]<br/>
+                                                <br/>
+                                                # Leere Liste<br/>
+                                                meine_liste = []
+                                            </code>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔢 Index: Auf Elemente zugreifen</h2>
+                                        <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                            <p className="mb-3 text-gray-700">Listen beginnen bei Index <strong>0</strong>:</p>
+                                            <div className="bg-blue-50 p-4 rounded-lg">
+                                                <div className="flex gap-2 justify-center mb-3">
+                                                    {['A', 'B', 'C', 'D'].map((item, i) => (
+                                                        <div key={i} className="text-center">
+                                                            <div className="bg-blue-500 text-white p-4 rounded-lg font-bold mb-2">{item}</div>
+                                                            <div className="text-sm text-gray-600">Index {i}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="bg-gray-900 text-green-400 p-3 rounded font-mono">
+                                                    <code>
+                                                        liste = ["A", "B", "C", "D"]<br/>
+                                                        print(liste[0])  # A<br/>
+                                                        print(liste[2])  # C
+                                                    </code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">➕ Elemente hinzufügen</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">Am Ende einfügen</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">
+                                                    liste.append("Neu")
+                                                </code>
+                                            </div>
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-blue-800 mb-2">An Position einfügen</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">
+                                                    liste.insert(1, "Neu")
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">➖ Elemente entfernen</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-red-800 mb-2">Nach Wert entfernen</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">
+                                                    liste.remove("Brot")
+                                                </code>
+                                            </div>
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-orange-800 mb-2">Nach Index entfernen</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">
+                                                    liste.pop(0)
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔄 Nützliche Funktionen</h2>
+                                        <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                            <ul className="space-y-2 text-gray-700">
+                                                <li>📏 <code className="bg-gray-200 px-2 py-1 rounded">len(liste)</code> - Anzahl der Elemente</li>
+                                                <li>🔀 <code className="bg-gray-200 px-2 py-1 rounded">liste.sort()</code> - Liste sortieren</li>
+                                                <li>🔄 <code className="bg-gray-200 px-2 py-1 rounded">liste.reverse()</code> - Liste umkehren</li>
+                                                <li>✅ <code className="bg-gray-200 px-2 py-1 rounded">"A" in liste</code> - Prüfen ob Element vorhanden</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💡 Beispiel</h2>
+                                        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                                            <div className="bg-gray-900 text-green-400 p-3 rounded font-mono">
+                                                <code>
+                                                    # Notenliste<br/>
+                                                    noten = [2, 1, 3, 2, 1]<br/>
+                                                    <br/>
+                                                    durchschnitt = sum(noten) / len(noten)<br/>
+                                                    print("Durchschnitt:", durchschnitt)
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🛒 Interaktive Einkaufsliste</h2>
+                                        <div className="bg-indigo-50 rounded-lg p-6">
+                                            <div className="mb-4">
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={newItem}
+                                                        onChange={(e) => setNewItem(e.target.value)}
+                                                        onKeyPress={(e) => e.key === 'Enter' && addItem()}
+                                                        className="flex-1 p-2 border-2 border-gray-300 rounded"
+                                                        placeholder="Neues Produkt..."
+                                                    />
+                                                    <button 
+                                                        onClick={addItem}
+                                                        className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold"
+                                                    >
+                                                        + Hinzufügen
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="bg-white rounded-lg border-2 border-gray-300 p-4">
+                                                <h3 className="font-bold mb-3">Aktuelle Liste ({shoppingList.length} Produkte):</h3>
+                                                {shoppingList.length === 0 ? (
+                                                    <p className="text-gray-500 italic">Liste ist leer</p>
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        {shoppingList.map((item, index) => (
+                                                            <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded">
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className="font-mono text-sm text-gray-500">[{index}]</span>
+                                                                    <span>{item}</span>
+                                                                </div>
+                                                                <button 
+                                                                    onClick={() => removeItem(index)}
+                                                                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                                                                >
+                                                                    ✕ Löschen
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔢 Zahlen sortieren</h2>
+                                        <div className="bg-purple-50 rounded-lg p-6">
+                                            <div className="bg-white rounded-lg border-2 border-gray-300 p-4 mb-4">
+                                                <h3 className="font-bold mb-3">Aktuelle Zahlen:</h3>
+                                                <div className="flex gap-2 justify-center mb-4">
+                                                    {numbers.map((num, i) => (
+                                                        <div key={i} className="bg-purple-500 text-white p-4 rounded-lg font-bold text-xl">
+                                                            {num}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <button 
+                                                    onClick={sortNumbers}
+                                                    className="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 font-semibold"
+                                                >
+                                                    🔀 Sortieren (kleinste zuerst)
+                                                </button>
+                                            </div>
+                                            <div className="bg-gray-900 text-green-400 p-3 rounded font-mono">
+                                                <code>
+                                                    zahlen = {JSON.stringify(numbers)}<br/>
+                                                    zahlen.sort()<br/>
+                                                    print(zahlen)
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📋 Listen-Operationen</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-blue-800 mb-2">Länge ermitteln</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">
+                                                    len([1,2,3,4,5]) → 5
+                                                </code>
+                                            </div>
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">Maximum finden</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">
+                                                    max([3,7,2,9,1]) → 9
+                                                </code>
+                                            </div>
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-orange-800 mb-2">Minimum finden</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">
+                                                    min([3,7,2,9,1]) → 1
+                                                </code>
+                                            </div>
+                                            <div className="bg-pink-50 border-2 border-pink-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-pink-800 mb-2">Summe berechnen</h3>
+                                                <code className="text-sm bg-gray-900 text-green-400 p-2 block rounded">
+                                                    sum([1,2,3,4,5]) → 15
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="font-mono text-sm">{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-indigo-500 text-white rounded-lg font-bold hover:bg-indigo-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du kennst dich mit Listen aus!' :
+                                                 score >= 3 ? '👍 Sehr gut!' :
+                                                 score >= 2 ? '📚 Übe noch ein bisschen!' :
+                                                 '💪 Schau dir die Theorie nochmal an!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-indigo-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<ListenApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sortieralgorithmen - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-amber-500 to-orange-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function BubbleSortApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            const [array, setArray] = useState([64, 34, 25, 12, 22, 11, 90]);
+            const [sortedArray, setSortedArray] = useState(null);
+            const [sorting, setSorting] = useState(false);
+            const [currentStep, setCurrentStep] = useState(-1);
+            const [comparing, setComparing] = useState([-1, -1]);
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was macht Bubble Sort?",
+                    options: ["Sucht ein Element", "Sortiert Zahlen", "Löscht Elemente", "Addiert Zahlen"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Woher kommt der Name 'Bubble Sort'?",
+                    options: ["Von Seifenblasen", "Große Zahlen 'blubbern' nach oben", "Von einem Erfinder", "Ist zufällig"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Wie funktioniert Bubble Sort?",
+                    options: ["Teilt die Liste", "Vergleicht benachbarte Elemente", "Wählt das kleinste Element", "Nutzt Rekursion"],
+                    correct: 1
+                },
+                {
+                    id: 4,
+                    question: "Ist Bubble Sort effizient für große Listen?",
+                    options: ["Ja, sehr effizient", "Nein, eher langsam", "Nur bei sortierten Listen", "Nur bei kleinen Zahlen"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k8-01';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const bubbleSort = () => {
+                setSorting(true);
+                const arr = [...array];
+                const steps = [];
+                
+                for (let i = 0; i < arr.length - 1; i++) {
+                    for (let j = 0; j < arr.length - i - 1; j++) {
+                        steps.push({ array: [...arr], comparing: [j, j + 1] });
+                        if (arr[j] > arr[j + 1]) {
+                            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                            steps.push({ array: [...arr], comparing: [j, j + 1] });
+                        }
+                    }
+                }
+                
+                animateSteps(steps);
+            };
+
+            const animateSteps = (steps) => {
+                let index = 0;
+                const interval = setInterval(() => {
+                    if (index >= steps.length) {
+                        clearInterval(interval);
+                        setSorting(false);
+                        setComparing([-1, -1]);
+                        return;
+                    }
+                    setSortedArray(steps[index].array);
+                    setComparing(steps[index].comparing);
+                    index++;
+                }, 500);
+            };
+
+            const resetArray = () => {
+                setArray([64, 34, 25, 12, 22, 11, 90]);
+                setSortedArray(null);
+                setComparing([-1, -1]);
+            };
+
+            const randomizeArray = () => {
+                const newArray = Array.from({ length: 7 }, () => Math.floor(Math.random() * 100));
+                setArray(newArray);
+                setSortedArray(null);
+                setComparing([-1, -1]);
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">🔢</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Sortieralgorithmen</h1>
+                                    <p className="text-gray-600">Klasse 8 - Bubble Sort</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔢 Was ist Bubble Sort?</h2>
+                                        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                <strong>Bubble Sort</strong> ist ein einfacher Sortieralgorithmus. Er vergleicht immer zwei benachbarte Zahlen
+                                                und tauscht sie, wenn sie in der falschen Reihenfolge sind. Große Zahlen "blubbern" wie Blasen nach oben!
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔄 Wie funktioniert Bubble Sort?</h2>
+                                        <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                            <ol className="space-y-3 text-gray-700 list-decimal list-inside">
+                                                <li><strong>Vergleiche</strong> zwei benachbarte Zahlen</li>
+                                                <li><strong>Tausche</strong> sie, wenn die linke größer ist als die rechte</li>
+                                                <li><strong>Gehe</strong> zum nächsten Paar und wiederhole</li>
+                                                <li><strong>Mache</strong> mehrere Durchläufe, bis alles sortiert ist</li>
+                                            </ol>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📝 Beispiel Schritt für Schritt</h2>
+                                        <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                            <p className="mb-2 font-bold">Unsortierte Liste: [5, 2, 8, 1]</p>
+                                            <div className="space-y-2 text-sm">
+                                                <div className="bg-white p-2 rounded">
+                                                    <strong>Durchlauf 1:</strong><br/>
+                                                    5 > 2? Ja → Tausche: [2, 5, 8, 1]<br/>
+                                                    5 > 8? Nein<br/>
+                                                    8 > 1? Ja → Tausche: [2, 5, 1, 8] ✓
+                                                </div>
+                                                <div className="bg-white p-2 rounded">
+                                                    <strong>Durchlauf 2:</strong><br/>
+                                                    2 > 5? Nein<br/>
+                                                    5 > 1? Ja → Tausche: [2, 1, 5, 8]<br/>
+                                                </div>
+                                                <div className="bg-white p-2 rounded">
+                                                    <strong>Durchlauf 3:</strong><br/>
+                                                    2 > 1? Ja → Tausche: [1, 2, 5, 8] ✓
+                                                </div>
+                                                <p className="text-green-600 font-bold">Fertig sortiert!</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">💻 Python Code</h2>
+                                        <div className="bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-sm">
+                                            <code>
+def bubble_sort(liste):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;n = len(liste)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;for i in range(n-1):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for j in range(n-i-1):<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if liste[j] > liste[j+1]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Tausche<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;liste[j], liste[j+1] = liste[j+1], liste[j]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;return liste
+                                            </code>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">⚡ Eigenschaften</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">✓ Vorteile</h3>
+                                                <ul className="text-sm text-gray-600 space-y-1">
+                                                    <li>• Einfach zu verstehen</li>
+                                                    <li>• Einfach zu implementieren</li>
+                                                    <li>• Braucht keinen extra Speicher</li>
+                                                </ul>
+                                            </div>
+                                            <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-red-800 mb-2">✗ Nachteile</h3>
+                                                <ul className="text-sm text-gray-600 space-y-1">
+                                                    <li>• Sehr langsam bei vielen Zahlen</li>
+                                                    <li>• Nicht effizient</li>
+                                                    <li>• Viele Vergleiche nötig</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">�� Wann nutzt man Bubble Sort?</h2>
+                                        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                                            <p className="text-gray-700">
+                                                Bubble Sort wird in der Praxis <strong>selten verwendet</strong>, da es langsam ist. 
+                                                Es ist aber perfekt zum <strong>Lernen</strong>, weil es so einfach zu verstehen ist! 
+                                                Für echte Programme nutzt man schnellere Algorithmen wie QuickSort oder MergeSort.
+                                            </p>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎮 Bubble Sort Visualisierung</h2>
+                                        <div className="bg-amber-50 rounded-lg p-6">
+                                            <div className="mb-4">
+                                                <h3 className="font-bold mb-3">Array:</h3>
+                                                <div className="flex gap-2 justify-center mb-4">
+                                                    {(sortedArray || array).map((num, i) => (
+                                                        <div 
+                                                            key={i}
+                                                            className={`w-16 text-center p-4 rounded-lg font-bold text-white transition-all ${
+                                                                comparing.includes(i) ? 'bg-red-500 scale-110' : 'bg-blue-500'
+                                                            }`}
+                                                        >
+                                                            {num}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={bubbleSort}
+                                                    disabled={sorting}
+                                                    className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 font-semibold disabled:bg-gray-400"
+                                                >
+                                                    ▶ Sortieren starten
+                                                </button>
+                                                <button 
+                                                    onClick={resetArray}
+                                                    className="px-6 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 font-semibold"
+                                                >
+                                                    🔄 Zurücksetzen
+                                                </button>
+                                                <button 
+                                                    onClick={randomizeArray}
+                                                    className="px-6 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 font-semibold"
+                                                >
+                                                    🎲 Zufällig
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Sortier-Beispiele</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                                <h3 className="font-bold mb-2">Vor dem Sortieren</h3>
+                                                <div className="flex gap-1">
+                                                    {[64, 34, 25, 12].map((n, i) => (
+                                                        <div key={i} className="flex-1 bg-red-400 text-white text-center py-2 rounded font-bold">
+                                                            {n}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold mb-2">Nach dem Sortieren</h3>
+                                                <div className="flex gap-1">
+                                                    {[12, 25, 34, 64].map((n, i) => (
+                                                        <div key={i} className="flex-1 bg-green-500 text-white text-center py-2 rounded font-bold">
+                                                            {n}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🔍 Vergleiche zählen</h2>
+                                        <div className="bg-purple-50 rounded-lg p-6">
+                                            <p className="mb-3">Bei einer Liste mit <strong>n</strong> Zahlen macht Bubble Sort:</p>
+                                            <div className="bg-white border-2 border-purple-300 rounded-lg p-4">
+                                                <ul className="space-y-2">
+                                                    <li>📊 4 Zahlen → etwa <strong>6 Vergleiche</strong></li>
+                                                    <li>📊 5 Zahlen → etwa <strong>10 Vergleiche</strong></li>
+                                                    <li>📊 10 Zahlen → etwa <strong>45 Vergleiche</strong></li>
+                                                    <li>📊 100 Zahlen → etwa <strong>4.950 Vergleiche!</strong></li>
+                                                </ul>
+                                            </div>
+                                            <p className="mt-3 text-sm text-gray-600">Das wächst quadratisch: n × (n-1) / 2</p>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span>{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-amber-500 text-white rounded-lg font-bold hover:bg-amber-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du verstehst Bubble Sort!' :
+                                                 score >= 3 ? '👍 Sehr gut!' :
+                                                 score >= 2 ? '📚 Übe noch etwas!' :
+                                                 '💪 Schau dir die Visualisierung nochmal an!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-amber-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<BubbleSortApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>

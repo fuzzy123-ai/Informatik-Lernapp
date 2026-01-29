@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objektorientierung - Informatik Lernapp</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        function OOPApp() {
+            const [activeTab, setActiveTab] = useState('theory');
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [score, setScore] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+            
+            const [objects, setObjects] = useState([]);
+            const [className, setClassName] = useState('Auto');
+            const [objectName, setObjectName] = useState('');
+            const [marke, setMarke] = useState('');
+            const [farbe, setFarbe] = useState('');
+
+            const quizQuestions = [
+                {
+                    id: 1,
+                    question: "Was ist eine Klasse in der OOP?",
+                    options: ["Ein fertiges Objekt", "Ein Bauplan für Objekte", "Eine Variable", "Eine Funktion"],
+                    correct: 1
+                },
+                {
+                    id: 2,
+                    question: "Was ist Vererbung?",
+                    options: ["Objekte kopieren", "Eigenschaften von einer Oberklasse übernehmen", "Variablen teilen", "Methoden löschen"],
+                    correct: 1
+                },
+                {
+                    id: 3,
+                    question: "Was bedeutet Kapselung?",
+                    options: ["Daten verstecken und schützen", "Code löschen", "Objekte erstellen", "Klassen benennen"],
+                    correct: 0
+                },
+                {
+                    id: 4,
+                    question: "Was ist ein Objekt?",
+                    options: ["Eine Klasse", "Eine Instanz einer Klasse", "Eine Methode", "Ein Attribut"],
+                    correct: 1
+                }
+            ];
+
+            const handleQuizAnswer = (questionId, answerIndex) => {
+                setQuizAnswers({ ...quizAnswers, [questionId]: answerIndex });
+            };
+
+            const checkQuiz = () => {
+                let correctCount = 0;
+                quizQuestions.forEach(q => {
+                    if (quizAnswers[q.id] === q.correct) correctCount++;
+                });
+                setScore(correctCount);
+                setShowResults(true);
+            };
+
+            const completeLesson = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                const lessonId = 'k9-01';
+                
+                if (token && lessonId && typeof window.completeLesson === 'function') {
+                    const finalScore = Math.round((score / quizQuestions.length) * 100);
+                    window.completeLesson(token, lessonId, finalScore);
+                    alert(`Lektion abgeschlossen! Deine Punktzahl: ${finalScore}%`);
+                }
+                window.location.href = '../../student-dashboard.html';
+            };
+
+            const createObject = () => {
+                if (objectName && marke && farbe) {
+                    const newObj = {
+                        id: Date.now(),
+                        name: objectName,
+                        marke: marke,
+                        farbe: farbe,
+                        geschwindigkeit: 0
+                    };
+                    setObjects([...objects, newObj]);
+                    setObjectName('');
+                    setMarke('');
+                    setFarbe('');
+                }
+            };
+
+            const accelerate = (id) => {
+                setObjects(objects.map(obj => 
+                    obj.id === id ? { ...obj, geschwindigkeit: Math.min(obj.geschwindigkeit + 20, 200) } : obj
+                ));
+            };
+
+            const brake = (id) => {
+                setObjects(objects.map(obj => 
+                    obj.id === id ? { ...obj, geschwindigkeit: Math.max(obj.geschwindigkeit - 20, 0) } : obj
+                ));
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8 max-w-6xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl">🎭</span>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Objektorientierung</h1>
+                                    <p className="text-gray-600">Klasse 9 - Klassen, Objekte, Vererbung</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => window.location.href = '../../student-dashboard.html'}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                            >
+                                ← Zurück
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-6">
+                        <div className="flex border-b">
+                            <button 
+                                onClick={() => setActiveTab('theory')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'theory' ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                📚 Theorie
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('interactive')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'interactive' ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ⚡ Interaktiv
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('quiz')}
+                                className={`flex-1 px-6 py-3 font-semibold transition ${activeTab === 'quiz' ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            >
+                                ✅ Quiz
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === 'theory' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🎭 Was ist Objektorientierte Programmierung (OOP)?</h2>
+                                        <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 mb-4">
+                                            <p className="text-gray-700 leading-relaxed">
+                                                <strong>OOP</strong> ist ein Programmierparadigma, das die reale Welt in Code nachbildet.
+                                                Statt nur Funktionen zu schreiben, erstellen wir <strong>Objekte</strong> mit Eigenschaften und Fähigkeiten.
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📦 Klassen und Objekte</h2>
+                                        <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 mb-4">
+                                            <h3 className="font-bold text-blue-800 mb-2">Klasse = Bauplan</h3>
+                                            <p className="text-gray-700 mb-3">
+                                                Eine <strong>Klasse</strong> ist wie ein Bauplan oder eine Schablone. Sie definiert, welche Eigenschaften (Attribute) 
+                                                und Fähigkeiten (Methoden) Objekte dieser Klasse haben.
+                                            </p>
+                                            <div className="bg-white rounded-lg p-3 mb-3">
+                                                <h4 className="font-semibold mb-2">Beispiel: Klasse "Auto"</h4>
+                                                <div className="bg-gray-100 p-3 rounded font-mono text-sm">
+                                                    class Auto {'{'}<br/>
+                                                    &nbsp;&nbsp;// Attribute<br/>
+                                                    &nbsp;&nbsp;marke<br/>
+                                                    &nbsp;&nbsp;farbe<br/>
+                                                    &nbsp;&nbsp;geschwindigkeit<br/>
+                                                    <br/>
+                                                    &nbsp;&nbsp;// Methoden<br/>
+                                                    &nbsp;&nbsp;beschleunigen() {'{'} ... {'}'}<br/>
+                                                    &nbsp;&nbsp;bremsen() {'{'} ... {'}'}<br/>
+                                                    {'}'}
+                                                </div>
+                                            </div>
+                                            <h3 className="font-bold text-blue-800 mb-2">Objekt = Instanz</h3>
+                                            <p className="text-gray-700 mb-2">
+                                                Ein <strong>Objekt</strong> ist eine konkrete Instanz einer Klasse. Von einer Klasse können viele Objekte erstellt werden.
+                                            </p>
+                                            <div className="bg-gray-50 p-2 rounded text-sm">
+                                                <p><strong>meinAuto</strong> = neues Auto("VW", "rot", 0)</p>
+                                                <p><strong>deinAuto</strong> = neues Auto("BMW", "blau", 0)</p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🏛️ Die 4 Säulen der OOP</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-green-800 mb-2">1️⃣ Kapselung</h3>
+                                                <p className="text-sm text-gray-700">
+                                                    Daten und Methoden werden in Objekten gekapselt. Der Zugriff wird kontrolliert (private/public).
+                                                    Das schützt die Daten vor ungewollten Änderungen.
+                                                </p>
+                                            </div>
+                                            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-purple-800 mb-2">2️⃣ Vererbung</h3>
+                                                <p className="text-sm text-gray-700">
+                                                    Neue Klassen können Eigenschaften und Methoden von bestehenden Klassen erben.
+                                                    Z.B. "Sportwagen" erbt von "Auto" und fügt spezielle Eigenschaften hinzu.
+                                                </p>
+                                            </div>
+                                            <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-orange-800 mb-2">3️⃣ Polymorphie</h3>
+                                                <p className="text-sm text-gray-700">
+                                                    Objekte verschiedener Klassen können gleiche Methoden unterschiedlich ausführen.
+                                                    Z.B. "bewegen()" funktioniert anders bei Auto, Fahrrad und Flugzeug.
+                                                </p>
+                                            </div>
+                                            <div className="bg-pink-50 border-2 border-pink-300 rounded-lg p-4">
+                                                <h3 className="font-bold text-pink-800 mb-2">4️⃣ Abstraktion</h3>
+                                                <p className="text-sm text-gray-700">
+                                                    Komplexe Details werden verborgen, nur das Wesentliche wird gezeigt.
+                                                    Du musst nicht wissen, wie ein Auto funktioniert, um es zu fahren.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🌟 Vorteile von OOP</h2>
+                                        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                                            <ul className="space-y-2 text-gray-700">
+                                                <li>✅ <strong>Wiederverwendbar:</strong> Code kann mehrfach genutzt werden</li>
+                                                <li>✅ <strong>Strukturiert:</strong> Code ist übersichtlich organisiert</li>
+                                                <li>✅ <strong>Wartbar:</strong> Änderungen sind einfacher durchzuführen</li>
+                                                <li>✅ <strong>Realitätsnah:</strong> Bildet die echte Welt gut ab</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📖 Alltags-Beispiel</h2>
+                                        <div className="bg-blue-100 rounded-lg p-4">
+                                            <p className="text-gray-700 mb-2"><strong>Klasse:</strong> Smartphone (Bauplan)</p>
+                                            <p className="text-gray-700 mb-2"><strong>Attribute:</strong> Marke, Farbe, Speicher, Akku</p>
+                                            <p className="text-gray-700 mb-2"><strong>Methoden:</strong> anrufen(), nachrichtSenden(), fotoMachen()</p>
+                                            <p className="text-gray-700"><strong>Objekte:</strong> meinIPhone, deinSamsung, ihrHuawei</p>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'interactive' && (
+                                <div className="space-y-6">
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🚗 Auto-Objekte erstellen</h2>
+                                        <div className="bg-indigo-50 rounded-lg p-6">
+                                            <div className="bg-white rounded-lg p-4 mb-4">
+                                                <h3 className="font-bold text-indigo-800 mb-3">Klasse: {className}</h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                                                    <input
+                                                        type="text"
+                                                        value={objectName}
+                                                        onChange={(e) => setObjectName(e.target.value)}
+                                                        placeholder="Name (z.B. meinAuto)"
+                                                        className="p-2 border-2 border-gray-300 rounded"
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        value={marke}
+                                                        onChange={(e) => setMarke(e.target.value)}
+                                                        placeholder="Marke (z.B. VW)"
+                                                        className="p-2 border-2 border-gray-300 rounded"
+                                                    />
+                                                    <select
+                                                        value={farbe}
+                                                        onChange={(e) => setFarbe(e.target.value)}
+                                                        className="p-2 border-2 border-gray-300 rounded"
+                                                    >
+                                                        <option value="">Farbe wählen</option>
+                                                        <option value="rot">🔴 Rot</option>
+                                                        <option value="blau">🔵 Blau</option>
+                                                        <option value="grün">🟢 Grün</option>
+                                                        <option value="gelb">🟡 Gelb</option>
+                                                        <option value="schwarz">⚫ Schwarz</option>
+                                                    </select>
+                                                </div>
+                                                <button
+                                                    onClick={createObject}
+                                                    className="w-full bg-indigo-500 text-white py-2 rounded-lg hover:bg-indigo-600 font-semibold"
+                                                >
+                                                    ➕ Objekt erstellen
+                                                </button>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <h3 className="font-bold text-gray-800">Erstelle Objekte ({objects.length}):</h3>
+                                                {objects.length === 0 ? (
+                                                    <div className="bg-gray-100 rounded-lg p-4 text-center text-gray-500">
+                                                        Noch keine Objekte erstellt. Erstelle dein erstes Auto-Objekt!
+                                                    </div>
+                                                ) : (
+                                                    objects.map((obj) => (
+                                                        <div key={obj.id} className="bg-white border-2 border-indigo-300 rounded-lg p-4">
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <div>
+                                                                    <h4 className="font-bold text-lg">{obj.name}</h4>
+                                                                    <p className="text-sm text-gray-600">
+                                                                        Marke: {obj.marke} | Farbe: {obj.farbe}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <p className="text-2xl font-bold text-indigo-600">{obj.geschwindigkeit}</p>
+                                                                    <p className="text-xs text-gray-500">km/h</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="bg-gray-200 rounded-full h-3 mb-3">
+                                                                <div 
+                                                                    className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all"
+                                                                    style={{ width: `${(obj.geschwindigkeit / 200) * 100}%` }}
+                                                                ></div>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => accelerate(obj.id)}
+                                                                    className="flex-1 bg-green-500 text-white py-2 rounded hover:bg-green-600 font-semibold"
+                                                                >
+                                                                    ⬆️ Beschleunigen
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => brake(obj.id)}
+                                                                    className="flex-1 bg-red-500 text-white py-2 rounded hover:bg-red-600 font-semibold"
+                                                                >
+                                                                    ⬇️ Bremsen
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Vererbung Visualisiert</h2>
+                                        <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                                            <div className="space-y-3">
+                                                <div className="bg-blue-100 border-2 border-blue-500 rounded-lg p-3">
+                                                    <h4 className="font-bold text-blue-800">🚗 Oberklasse: Fahrzeug</h4>
+                                                    <p className="text-sm text-gray-700">marke, farbe, bewegen()</p>
+                                                </div>
+                                                <div className="flex items-center justify-center">
+                                                    <span className="text-3xl">⬇️</span>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                    <div className="bg-green-100 border-2 border-green-500 rounded-lg p-3">
+                                                        <h4 className="font-bold text-green-800">🚙 Auto</h4>
+                                                        <p className="text-sm text-gray-700">+ anzahlTüren</p>
+                                                    </div>
+                                                    <div className="bg-yellow-100 border-2 border-yellow-500 rounded-lg p-3">
+                                                        <h4 className="font-bold text-yellow-800">🚲 Fahrrad</h4>
+                                                        <p className="text-sm text-gray-700">+ anzahlGänge</p>
+                                                    </div>
+                                                    <div className="bg-red-100 border-2 border-red-500 rounded-lg p-3">
+                                                        <h4 className="font-bold text-red-800">🏍️ Motorrad</h4>
+                                                        <p className="text-sm text-gray-700">+ helmPflicht</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            )}
+
+                            {activeTab === 'quiz' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">✅ Quiz: Teste dein Wissen!</h2>
+                                    
+                                    {quizQuestions.map((q, index) => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                                            <h3 className="font-bold text-lg mb-3">Frage {index + 1}: {q.question}</h3>
+                                            <div className="space-y-2">
+                                                {q.options.map((option, optIndex) => (
+                                                    <label key={optIndex} className="flex items-center space-x-3 p-3 bg-white rounded border-2 border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${q.id}`}
+                                                            checked={quizAnswers[q.id] === optIndex}
+                                                            onChange={() => handleQuizAnswer(q.id, optIndex)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span>{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!showResults ? (
+                                        <button 
+                                            onClick={checkQuiz}
+                                            className="w-full py-3 bg-indigo-500 text-white rounded-lg font-bold hover:bg-indigo-600 transition"
+                                        >
+                                            Antworten überprüfen
+                                        </button>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg p-6 text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Ergebnis</h3>
+                                            <p className="text-4xl font-bold mb-4">{score} / {quizQuestions.length}</p>
+                                            <p className="mb-4">
+                                                {score === quizQuestions.length ? '🎉 Perfekt! Du bist ein OOP-Experte!' :
+                                                 score >= 3 ? '👍 Gut gemacht!' :
+                                                 score >= 2 ? '📚 Nicht schlecht, aber übe noch!' :
+                                                 '💪 Lies die Theorie nochmal und versuche es erneut!'}
+                                            </p>
+                                            <button 
+                                                onClick={completeLesson}
+                                                className="px-6 py-3 bg-white text-indigo-600 rounded-lg font-bold hover:bg-gray-100 transition"
+                                            >
+                                                Lektion abschließen
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<OOPApp />, document.getElementById('root'));
+    </script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/progress.js"></script>
+</body>
+</html>
