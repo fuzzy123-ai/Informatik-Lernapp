@@ -1,4 +1,4 @@
-﻿{
+{
   "classes": {
     "5a": { "name": "Klasse 5a", "grade": 5 },
     "5b": { "name": "Klasse 5b", "grade": 5 },
@@ -39,6 +39,32 @@
       { "id": "k6-02", "title": "Bedingungen in Scratch", "icon": "❓", "description": "Wenn-Dann-Strukturen", "path": "lessons/klasse6/bedingungen.html", "terms": ["Bedingung", "IF-ELSE", "Verzweigung"] },
       { "id": "k6-03", "title": "Variablen nutzen", "icon": "📦", "description": "Werte speichern und nutzen", "path": "lessons/klasse6/variablen.html", "terms": ["Variable", "Speicher", "Wert"] },
       { "id": "k6-04", "title": "Koordinaten und Bewegung", "icon": "🎯", "description": "X-Y-Koordinatensystem", "path": "lessons/klasse6/koordinaten.html", "terms": ["Koordinate", "Position", "X-Y"] }
+    ],
+    "7": [
+      { "id": "k7-01", "title": "Python Grundlagen", "icon": "🐍", "description": "Erste Schritte mit Python", "path": "lessons/klasse7/python_basics.html", "terms": ["Python", "Programmierung", "Syntax"] },
+      { "id": "k7-02", "title": "Algorithmen verstehen", "icon": "📊", "description": "Grundlagen der Algorithmen", "path": "lessons/klasse7/algorithmen.html", "terms": ["Algorithmus", "Ablauf", "Logik"] },
+      { "id": "k7-03", "title": "Funktionen definieren", "icon": "🔧", "description": "Wiederverwendbarer Code", "path": "lessons/klasse7/funktionen.html", "terms": ["Funktion", "Parameter", "Rückgabe"] },
+      { "id": "k7-04", "title": "Listen und Arrays", "icon": "📋", "description": "Datenstrukturen verstehen", "path": "lessons/klasse7/listen.html", "terms": ["Liste", "Array", "Index"] }
+    ],
+    "8": [
+      { "id": "k8-01", "title": "HTML Basics", "icon": "🌐", "description": "Webseiten strukturieren", "path": "lessons/klasse8/html_basics.html", "terms": ["HTML", "Tag", "Element"] },
+      { "id": "k8-02", "title": "CSS Styling", "icon": "🎨", "description": "Webseiten gestalten", "path": "lessons/klasse8/css_basics.html", "terms": ["CSS", "Stil", "Design"] },
+      { "id": "k8-03", "title": "Datenbanken", "icon": "🗄️", "description": "Daten speichern und abrufen", "path": "lessons/klasse8/datenbanken.html", "terms": ["Datenbank", "SQL", "Tabelle"] },
+      { "id": "k8-04", "title": "Sortieralgorithmen", "icon": "🔢", "description": "Daten sortieren", "path": "lessons/klasse8/bubble_sort.html", "terms": ["Bubble Sort", "Sortierung", "Vergleich"] },
+      { "id": "k8-05", "title": "Suchalgorithmen", "icon": "🔍", "description": "Daten effizient finden", "path": "lessons/klasse8/suchalgorithmen.html", "terms": ["Suche", "Binärsuche", "Linear"] }
+    ],
+    "9": [
+      { "id": "k9-01", "title": "Netzwerke", "icon": "🌍", "description": "Internet und Protokolle", "path": "lessons/klasse9/netzwerke.html", "terms": ["Netzwerk", "IP", "Protokoll"] },
+      { "id": "k9-02", "title": "JavaScript Basics", "icon": "⚡", "description": "Dynamische Webseiten", "path": "lessons/klasse9/javascript.html", "terms": ["JavaScript", "DOM", "Event"] },
+      { "id": "k9-03", "title": "Objektorientierung", "icon": "🏗️", "description": "OOP-Konzepte verstehen", "path": "lessons/klasse9/oop.html", "terms": ["Klasse", "Objekt", "Vererbung"] },
+      { "id": "k9-04", "title": "Rekursion", "icon": "🔁", "description": "Rekursive Algorithmen", "path": "lessons/klasse9/rekursion.html", "terms": ["Rekursion", "Basisfall", "Stack"] },
+      { "id": "k9-05", "title": "Dijkstra Algorithmus", "icon": "🗺️", "description": "Kürzeste Wege finden", "path": "lessons/klasse9/dijkstra.html", "terms": ["Dijkstra", "Graph", "Pfad"] },
+      { "id": "k9-06", "title": "Verschlüsselung", "icon": "🔐", "description": "Kryptographie Grundlagen", "path": "lessons/klasse9/verschluesselung.html", "terms": ["Verschlüsselung", "Kryptographie", "Sicherheit"] }
+    ],
+    "10": [
+      { "id": "k10-01", "title": "Git und Versionskontrolle", "icon": "📂", "description": "Code verwalten", "path": "lessons/klasse10/git.html", "terms": ["Git", "Repository", "Commit"] },
+      { "id": "k10-02", "title": "KI Grundlagen", "icon": "🤖", "description": "Künstliche Intelligenz verstehen", "path": "lessons/klasse10/ki_grundlagen.html", "terms": ["KI", "Machine Learning", "Algorithmus"] },
+      { "id": "k10-03", "title": "Komplexität", "icon": "📈", "description": "Algorithmen analysieren", "path": "lessons/klasse10/komplexitaet.html", "terms": ["Big-O", "Laufzeit", "Effizienz"] }
     ]
   },
   "teacherPassword": "P3stal0zzi"
