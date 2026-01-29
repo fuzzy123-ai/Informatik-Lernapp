@@ -39,25 +39,26 @@
     <script src="js/auth.js"></script>
     <script src="js/progress.js"></script>
     <script>
-        // Auth Check - stop execution if not authenticated
-        if (!requireAuth('student')) {
-            throw new Error('Not authenticated');
-        }
+        (function() {
+            // Auth Check - stop execution if not authenticated
+            if (!requireAuth('student')) {
+                return;
+            }
 
-        const session = getCurrentSession();
-        const user = getUserData(session.token);
+            const session = getCurrentSession();
+            const user = getUserData(session.token);
 
-        if (!user) {
-            logout();
-            throw new Error('User not found');
-        }
+            if (!user) {
+                logout();
+                return;
+            }
 
-        // User Info anzeigen
-        document.getElementById('studentName').textContent = user.name;
-        document.getElementById('studentClass').textContent = `Klasse ${user.class}`;
-        document.getElementById('tokenDisplay').textContent = session.token;
+            // User Info anzeigen
+            document.getElementById('studentName').textContent = user.name;
+            document.getElementById('studentClass').textContent = `Klasse ${user.class}`;
+            document.getElementById('tokenDisplay').textContent = session.token;
 
-        // Curriculum direkt eingebunden (wegen CORS bei file://)
+            // Curriculum direkt eingebunden (wegen CORS bei file://)
         const curriculum = {
             "classes": {
                 "5a": { "name": "Klasse 5a", "grade": 5 },
@@ -196,6 +197,7 @@
             // Zur Lektions-Seite navigieren
             window.location.href = lesson.path + '?token=' + token + '&lessonId=' + lesson.id;
         }
+        })();
     </script>
 </body>
 </html>
